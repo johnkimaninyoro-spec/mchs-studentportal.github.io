@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mara Christian High School - Management System</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#1a5276;--secondary:#2e86c1;--accent:#27ae60;--danger:#e74c3c;--warning:#f39c12;--light:#ecf0f1;--dark:#2c3e50;--white:#ffffff;--shadow:0 2px 10px rgba(0,0,0,0.1)}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;color:#333}
+a{text-decoration:none;color:inherit}
+.login-container{display:flex;justify-content:center;align-items:center;min-height:100vh;background:linear-gradient(135deg,#1a5276,#2e86c1,#27ae60)}
+.login-box{background:white;padding:40px;border-radius:15px;box-shadow:0 20px 60px rgba(0,0,0,0.3);width:420px;max-width:95vw;text-align:center}
+.login-box h1{color:var(--primary);font-size:1.5em;margin-bottom:5px;margin-top:10px}
+.login-box h2{color:var(--secondary);font-size:1em;margin-bottom:25px;font-weight:normal}
+.login-box input{width:100%;padding:12px 15px;margin:8px 0;border:2px solid #ddd;border-radius:8px;font-size:14px;transition:border 0.3s}
+.login-box input:focus{border-color:var(--secondary);outline:none}
+.login-box button{width:100%;padding:14px;background:var(--primary);color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;margin-top:10px;transition:background 0.3s}
+.login-box button:hover{background:var(--secondary)}
+.login-box button:disabled{opacity:0.6;cursor:not-allowed}
+.login-error{color:var(--danger);margin-top:10px;font-size:14px;min-height:20px}
+.app-container{display:none}
+.top-bar{background:var(--primary);color:white;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1000;box-shadow:var(--shadow);flex-wrap:wrap;gap:10px}
+.top-bar .logo-area{display:flex;align-items:center;gap:10px}
+.top-bar h1{font-size:1.1em}
+.top-bar .user-info{display:flex;align-items:center;gap:15px;flex-wrap:wrap}
+.top-bar .user-info span{font-size:0.9em}
+.top-bar .user-info .role-badge{background:var(--accent);padding:3px 10px;border-radius:12px;font-size:0.75em;font-weight:bold}
+.sync-badge{background:#27ae60;padding:3px 10px;border-radius:12px;font-size:0.7em}
+.sync-badge.offline{background:#e74c3c}
+.btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:13px;transition:all 0.3s;font-weight:500}
+.btn-primary{background:var(--secondary);color:white}
+.btn-primary:hover{background:var(--primary)}
+.btn-success{background:var(--accent);color:white}
+.btn-success:hover{background:#219a52}
+.btn-danger{background:var(--danger);color:white}
+.btn-danger:hover{background:#c0392b}
+.btn-warning{background:var(--warning);color:white}
+.btn-warning:hover{background:#e67e22}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-outline{background:transparent;border:2px solid var(--secondary);color:var(--secondary)}
+.btn-outline:hover{background:var(--secondary);color:white}
+.main-layout{display:flex;min-height:calc(100vh - 65px)}
+.sidebar{width:250px;background:var(--dark);color:white;overflow-y:auto;flex-shrink:0;transition:all 0.3s}
+.sidebar .nav-item{padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.3s;border-left:3px solid transparent;font-size:0.9em}
+.sidebar .nav-item:hover{background:rgba(255,255,255,0.1)}
+.sidebar .nav-item.active{background:rgba(255,255,255,0.15);border-left-color:var(--accent)}
+.sidebar .nav-item .icon{font-size:1.2em;width:25px;text-align:center}
+.sidebar .nav-section{padding:10px 20px 5px;font-size:0.7em;text-transform:uppercase;color:#7f8c8d;letter-spacing:1px}
+.content-area{flex:1;padding:20px;overflow-y:auto;max-height:calc(100vh - 65px)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.card{background:white;border-radius:10px;padding:20px;margin-bottom:20px;box-shadow:var(--shadow)}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid var(--light);flex-wrap:wrap;gap:10px}
+.card-header h2{color:var(--primary);font-size:1.2em}
+.card-header h3{color:var(--primary);font-size:1em}
+.table-container{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.85em}
+th{background:var(--primary);color:white;padding:10px 12px;text-align:left;font-weight:600;white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid #eee}
+tr:hover{background:#f8f9fa}
+tr:nth-child(even){background:#fafbfc}
+tr:nth-child(even):hover{background:#f0f4f8}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:15px}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;margin-bottom:5px;font-weight:600;color:var(--dark);font-size:0.85em}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:8px 12px;border:2px solid #ddd;border-radius:6px;font-size:13px;transition:border 0.3s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--secondary);outline:none}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-row{display:flex;gap:15px;flex-wrap:wrap}
+.form-row .form-group{flex:1;min-width:200px}
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal{background:white;border-radius:12px;padding:25px;width:90%;max-width:700px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid var(--light)}
+.modal-header h2{color:var(--primary)}
+.modal-close{background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:0 5px}
+.modal-close:hover{color:var(--danger)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:15px;margin-bottom:20px}
+.stat-card{background:white;border-radius:10px;padding:20px;box-shadow:var(--shadow);text-align:center;border-top:4px solid var(--secondary)}
+.stat-card .stat-number{font-size:2em;font-weight:bold;color:var(--primary)}
+.stat-card .stat-label{color:#666;font-size:0.85em;margin-top:5px}
+.grade-A,.grade-B{color:#27ae60;font-weight:bold}
+.grade-C{color:#f39c12;font-weight:bold}
+.grade-D,.grade-F{color:#e74c3c;font-weight:bold}
+.badge{padding:3px 10px;border-radius:12px;font-size:0.75em;font-weight:bold;display:inline-block}
+.badge-success{background:#d5f5e3;color:#27ae60}
+.badge-danger{background:#fadbd8;color:#e74c3c}
+.badge-warning{background:#fdebd0;color:#f39c12}
+.badge-info{background:#d6eaf8;color:#2e86c1}
+.badge-prefect{background:#f9e79f;color:#8e6b00}
+.badge-med{background:#e8daef;color:#6c3483}
+.badge-newillness{background:#d6eaf8;color:#1a5276}
+.badge-preexisting{background:#fdebd0;color:#8e6b00}
+.student-profile{display:flex;gap:20px;flex-wrap:wrap}
+.student-photo{width:150px;height:180px;border-radius:10px;object-fit:cover;border:3px solid var(--primary);background:#eee;display:flex;align-items:center;justify-content:center;font-size:3em;color:#ccc}
+.student-info-grid{flex:1;min-width:300px}
+.info-row{display:flex;padding:6px 0;border-bottom:1px solid #eee}
+.info-row .info-label{width:180px;font-weight:600;color:var(--dark);font-size:0.85em}
+.info-row .info-value{flex:1;color:#555;font-size:0.85em}
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:20px}
+.chart-container{position:relative;height:300px}
+.log-entry{padding:8px 12px;border-left:3px solid var(--secondary);margin-bottom:8px;background:#f8f9fa;border-radius:0 6px 6px 0;font-size:0.85em}
+.log-entry .log-time{color:#999;font-size:0.8em}
+@media(max-width:768px){
+.sidebar{position:fixed;left:-260px;z-index:999;height:calc(100vh - 65px);transition:left 0.3s}
+.sidebar.show{left:0}
+.content-area{padding:10px}
+.form-grid{grid-template-columns:1fr}
+.charts-grid{grid-template-columns:1fr}
+.stats-grid{grid-template-columns:repeat(2,1fr)}
+.menu-toggle{display:block!important}
+}
+.menu-toggle{display:none;background:none;border:none;color:white;font-size:24px;cursor:pointer}
+@media print{.sidebar,.top-bar,.btn{display:none!important}.content-area{max-height:none;padding:0}}
+.search-box{position:relative;margin-bottom:15px}
+.search-box input{width:100%;padding:10px 15px 10px 40px;border:2px solid #ddd;border-radius:8px;font-size:14px}
+.search-box::before{content:"🔍";position:absolute;left:12px;top:50%;transform:translateY(-50%)}
+.notification{position:fixed;top:80px;right:20px;padding:12px 20px;border-radius:8px;color:white;z-index:3000;animation:slideIn 0.3s ease;box-shadow:0 4px 15px rgba(0,0,0,0.2);font-size:0.9em}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.notification.success{background:var(--accent)}
+.notification.error{background:var(--danger)}
+.notification.info{background:var(--secondary)}
+select[multiple]{height:120px}
+.level-badge{padding:3px 10px;border-radius:12px;font-size:0.75em;font-weight:bold}
+.level-junior{background:#d5f5e3;color:#1a5276}
+.level-senior{background:#fdebd0;color:#8e44ad}
+.stream-east{background:#d6eaf8;color:#1a5276}
+.stream-west{background:#fdebd0;color:#8e44ad}
+.loading-spinner{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage" class="login-container">
+<div class="login-box">
+<h1>Mara Christian High School</h1>
+<h2>Student Management System (Cloud-Synced)</h2>
+<input type="email" id="loginEmail" placeholder="Email address" autocomplete="username">
+<input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+<button id="loginBtn" onclick="handleLogin()">Sign In</button>
+<div class="login-error" id="loginError"></div>
+<p style="margin-top:15px;font-size:0.75em;color:#999">Contact admin for account access. Data syncs live across all devices.</p>
+</div>
+</div>
+
+<!-- MAIN APP -->
+<div id="appContainer" class="app-container">
+<div class="top-bar">
+<div class="logo-area">
+<button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+<h1>Mara Christian High School</h1>
+</div>
+<div class="user-info">
+<span class="sync-badge" id="syncBadge">🟢 Live</span>
+<span id="currentUserDisplay"></span>
+<span class="role-badge" id="currentRoleBadge"></span>
+<button class="btn btn-sm btn-outline" style="color:white;border-color:white" onclick="showChangePassword()">🔑 Change Password</button>
+<button class="btn btn-sm btn-danger" onclick="handleLogout()">Logout</button>
+</div>
+</div>
+
+<div class="main-layout">
+<div class="sidebar" id="sidebar">
+<div class="nav-section">Main</div>
+<div class="nav-item active" onclick="showTab('dashboard')" data-tab="dashboard"><span class="icon">📊</span> Dashboard</div>
+<div class="nav-item" onclick="showTab('students')" data-tab="students"><span class="icon">👩‍🎓</span> Student Records</div>
+<div class="nav-section">Academic</div>
+<div class="nav-item" onclick="showTab('grades')" data-tab="grades"><span class="icon">📝</span> Grades</div>
+<div class="nav-item" onclick="showTab('attendance')" data-tab="attendance"><span class="icon">📋</span> Attendance</div>
+<div class="nav-item" onclick="showTab('classRegister')" data-tab="classRegister"><span class="icon">📖</span> Class Register</div>
+<div class="nav-section">Discipline</div>
+<div class="nav-item" onclick="showTab('warnings')" data-tab="warnings"><span class="icon">⚠️</span> Warning Letters</div>
+<div class="nav-item" onclick="showTab('suspensions')" data-tab="suspensions"><span class="icon">🚫</span> Suspensions</div>
+<div class="nav-item" onclick="showTab('expulsions')" data-tab="expulsions"><span class="icon">❌</span> Expulsions</div>
+<div class="nav-section">Health</div>
+<div class="nav-item" onclick="showTab('clinic')" data-tab="clinic"><span class="icon">🏥</span> Clinic Visits</div>
+<div class="nav-section">Staff</div>
+<div class="nav-item" onclick="showTab('teachers')" data-tab="teachers"><span class="icon">👨‍🏫</span> Teachers</div>
+<div class="nav-item" onclick="showTab('teacherAttendance')" data-tab="teacherAttendance"><span class="icon">📅</span> Teacher Attendance</div>
+<div class="nav-item" onclick="showTab('classroom')" data-tab="classroom"><span class="icon">🏫</span> Classroom Status</div>
+<div class="nav-item" onclick="showTab('analytics')" data-tab="analytics"><span class="icon">📈</span> Analytics & Charts</div>
+<div class="nav-section" id="adminNavSection" style="display:none">Administration</div>
+<div class="nav-item" id="usersNavItem" style="display:none" onclick="showTab('users')" data-tab="users"><span class="icon">👥</span> User Management</div>
+<div class="nav-item" id="auditNavItem" style="display:none" onclick="showTab('audit')" data-tab="audit"><span class="icon">🔍</span> Audit Log</div>
+</div>
+
+<div class="content-area">
+
+<!-- DASHBOARD -->
+<div class="tab-content active" id="tab-dashboard">
+<div class="card"><div class="card-header"><h2>📊 Dashboard Overview</h2></div>
+<div class="stats-grid" id="dashboardStats"></div></div>
+<div class="card"><div class="card-header"><h3>🏠 Boarding Status</h3></div>
+<div class="stats-grid" id="boardingStats"></div></div>
+<div class="card"><div class="card-header"><h3>🚻 Gender Distribution</h3></div>
+<div class="stats-grid" id="genderStats"></div></div>
+<div class="charts-grid">
+<div class="card"><div class="card-header"><h3>Students Per Class Stream</h3></div><div class="chart-container"><canvas id="dashLevelChart"></canvas></div></div>
+<div class="card"><div class="card-header"><h3>Grade Distribution</h3></div><div class="chart-container"><canvas id="dashGradeChart"></canvas></div></div>
+<div class="card"><div class="card-header"><h3>Attendance This Week</h3></div><div class="chart-container"><canvas id="dashAttendanceChart"></canvas></div></div>
+<div class="card"><div class="card-header"><h3>Clinic Visits This Month</h3></div><div class="chart-container"><canvas id="dashClinicChart"></canvas></div></div>
+</div></div>
+
+<!-- STUDENTS -->
+<div class="tab-content" id="tab-students">
+<div class="card"><div class="card-header">
+<h2>👩‍🎓 Student Records</h2>
+<button class="btn btn-primary" onclick="showAddStudentModal()" id="addStudentBtn">+ Add Student</button>
+</div>
+<div class="form-row" style="margin-bottom:15px">
+<div class="form-group"><label>Filter by Level</label>
+<select id="studentLevelFilter" onchange="renderStudentTable()">
+<option value="">All Levels</option>
+<optgroup label="Junior Secondary (CBC)"><option value="Grade 7">Grade 7</option><option value="Grade 8">Grade 8</option><option value="Grade 9">Grade 9</option></optgroup>
+<optgroup label="Senior Secondary"><option value="Grade 10">Grade 10</option><option value="Form 3">Form 3</option><option value="Form 4">Form 4</option></optgroup>
+</select></div>
+<div class="form-group"><label>Filter by Stream</label>
+<select id="studentStreamFilter" onchange="renderStudentTable()"><option value="">All</option><option value="East">East</option><option value="West">West</option></select></div>
+<div class="form-group"><label>Filter by Prefect</label>
+<select id="studentPrefectFilter" onchange="renderStudentTable()"><option value="">All</option><option value="Yes">Prefects Only</option><option value="No">Non-Prefects</option></select></div>
+<div class="form-group"><label>Filter by Status</label>
+<select id="studentStatusFilter" onchange="renderStudentTable()"><option value="">All</option><option value="Boarder">Boarders</option><option value="Day Scholar">Day Scholars</option></select></div>
+<div class="form-group"><label>Filter by Gender</label>
+<select id="studentGenderFilter" onchange="renderStudentTable()"><option value="">All</option><option value="Male">Boys</option><option value="Female">Girls</option></select></div>
+<div class="form-group"><label>Search</label><div class="search-box"><input type="text" id="studentSearch" placeholder="Search..." oninput="renderStudentTable()"></div></div>
+</div>
+<div class="table-container"><table>
+<thead><tr><th>Photo</th><th>Adm No.</th><th>Name</th><th>Class</th><th>Stream</th><th>Level</th><th>Prefect</th><th>Status</th><th>Parent/Guardian</th><th>Actions</th></tr></thead>
+<tbody id="studentTableBody"></tbody>
+</table></div></div></div>
+
+<!-- STUDENT DETAIL -->
+<div class="tab-content" id="tab-studentDetail">
+<div class="card"><button class="btn btn-outline" onclick="showTab('students')" style="margin-bottom:15px">← Back to Students</button>
+<div id="studentDetailContent"></div></div></div>
+
+<!-- GRADES -->
+<div class="tab-content" id="tab-grades">
+<div class="card"><div class="card-header">
+<h2>📝 Student Grades</h2>
+<button class="btn btn-primary" onclick="showAddGradeModal()" id="addGradeBtn">+ Add Grade</button>
+</div>
+<div class="form-row" style="margin-bottom:15px">
+<div class="form-group"><label>Class</label><select id="gradeClassFilter" onchange="renderGradesTable()"><option value="">All Classes</option></select></div>
+<div class="form-group"><label>Subject</label><select id="gradeSubjectFilter" onchange="renderGradesTable()"><option value="">All Subjects</option></select></div>
+<div class="form-group"><label>Term</label><select id="gradeTermFilter" onchange="renderGradesTable()"><option value="">All Terms</option><option>Term 1</option><option>Term 2</option><option>Term 3</option></select></div>
+</div>
+<div class="table-container"><table>
+<thead><tr><th>Student</th><th>Class</th><th>Subject</th><th>Term</th><th>Test 1</th><th>Test 2</th><th>Exam</th><th>Total</th><th>Grade</th><th>Actions</th></tr></thead>
+<tbody id="gradesTableBody"></tbody>
+</table></div></div></div>
+
+<!-- ATTENDANCE -->
+<div class="tab-content" id="tab-attendance">
+<div class="card"><div class="card-header">
+<h2>📋 School Attendance</h2>
+<button class="btn btn-primary" onclick="showAddAttendanceModal()" id="addAttendanceBtn">+ Mark Attendance</button>
+</div>
+<div class="form-row" style="margin-bottom:15px">
+<div class="form-group"><label>Date</label><input type="date" id="attendanceDateFilter" onchange="renderAttendanceTable()"></div>
+<div class="form-group"><label>Class</label><select id="attendanceClassFilter" onchange="renderAttendanceTable()"><option value="">All Classes</option></select></div>
+</div>
+<div class="table-container"><table>
+<thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Status</th><th>Reason</th><th>Marked By</th><th>Actions</th></tr></thead>
+<tbody id="attendanceTableBody"></tbody>
+</table></div></div></div>
+
+<!-- CLASS REGISTER -->
+<div class="tab-content" id="tab-classRegister">
+<div class="card"><div class="card-header">
+<h2>📖 Class Register</h2>
+<button class="btn btn-primary" onclick="showClassRegisterModal()" id="addRegisterBtn">+ Mark Class Register</button>
+</div>
+<div class="form-row" style="margin-bottom:15px">
+<div class="form-group"><label>Class</label><select id="registerClassFilter" onchange="renderClassRegister()"><option value="">Select Class</option></select></div>
+<div class="form-group"><label>Date</label><input type="date" id="registerDateFilter" onchange="renderClassRegister()"></div>
+</div>
+<div class="table-container"><table>
+<thead><tr><th>Student</th><th>Status</th><th>Reason</th><th>Marked By</th><th>Time</th></tr></thead>
+<tbody id="registerTableBody"></tbody>
+</table></div></div></div>
+
+<!-- WARNINGS -->
+<div class="tab-content" id="tab-warnings">
+<div class="card"><div class="card-header">
+<h2>⚠️ Warning Letters</h2><button class="btn btn-primary" onclick="showAddWarningModal()" id="addWarningBtn">+ Issue Warning</button>
+</div><div class="table-container"><table>
+<thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Reason</th><th>Issued By</th><th>Actions</th></tr></thead>
+<tbody id="warningsTableBody"></tbody>
+</table></div></div></div>
+
+<!-- SUSPENSIONS -->
+<div class="tab-content" id="tab-suspensions">
+<div class="card"><div class="card-header">
+<h2>🚫 Suspensions</h2><button class="btn btn-primary" onclick="showAddSuspensionModal()" id="addSuspensionBtn">+ Add Suspension</button>
+</div><div class="table-container"><table>
+<thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Reason</th><th>Duration</th><th>Status</th><th>Actions</th></tr></thead>
+<tbody id="suspensionsTableBody"></tbody>
+</table></div></div></div>
+
+<!-- EXPULSIONS -->
+<div class="tab-content" id="tab-expulsions">
+<div class="card"><div class="card-header">
+<h2>❌ Expulsions</h2><button class="btn btn-primary" onclick="showAddExpulsionModal()" id="addExpulsionBtn">+ Record Expulsion</button>
+</div><div class="table-container"><table>
+<thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Reason</th><th>Approved By</th><th>Actions</th></tr></thead>
+<tbody id="expulsionsTableBody"></tbody>
+</table></div></div></div>
+
+<!-- CLINIC -->
+<div class="tab-content" id="tab-clinic">
+<div class="card"><div class="card-header">
+<h2>🏥 Clinic Visits</h2><button class="btn btn-primary" onclick="showAddClinicModal()" id="addClinicBtn">+ Record Visit</button>
+</div><div class="table-container"><table>
+<thead><tr><th>Date</th><th>Student</th><th>Arrival</th><th>Doctor/Nurse</th><th>Complaint</th><th>Condition</th><th>Medication</th><th>Diagnosis</th><th>Sent Back</th><th>Parent Contacted</th><th>Actions</th></tr></thead>
+<tbody id="clinicTableBody"></tbody>
+</table></div></div></div>
+
+<!-- TEACHERS -->
+<div class="tab-content" id="tab-teachers">
+<div class="card"><div class="card-header">
+<h2>👨‍🏫 Teachers</h2><button class="btn btn-primary" onclick="showAddTeacherModal()" id="addTeacherBtn">+ Add Teacher</button>
+</div><div class="table-container"><table>
+<thead><tr><th>Name</th><th>Employee ID</th><th>TSC Number</th><th>Subjects</th><th>Classes</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+<tbody id="teachersTableBody"></tbody>
+</table></div></div>
+<div class="card"><div class="card-header"><h3>📊 Teacher Performance</h3></div><div class="chart-container"><canvas id="teacherPerfChart"></canvas></div></div>
+</div>
+
+<!-- TEACHER ATTENDANCE -->
+<div class="tab-content" id="tab-teacherAttendance">
+<div class="card"><div class="card-header">
+<h2>📅 Teacher Attendance</h2><button class="btn btn-primary" onclick="showTeacherAttendanceModal()" id="addTeacherAttBtn">+ Mark Attendance</button>
+</div>
+<div class="form-row" style="margin-bottom:15px"><div class="form-group"><label>Date</label><input type="date" id="teacherAttDate" onchange="renderTeacherAttendance()"></div></div>
+<div class="table-container"><table>
+<thead><tr><th>Date</th><th>Teacher</th><th>Time In</th><th>Status</th><th>Reason</th><th>Marked By</th><th>Actions</th></tr></thead>
+<tbody id="teacherAttendanceBody"></tbody>
+</table></div></div></div>
+
+<!-- CLASSROOM -->
+<div class="tab-content" id="tab-classroom">
+<div class="card"><div class="card-header">
+<h2>🏫 Classroom Status</h2><button class="btn btn-primary" onclick="showClassroomModal()" id="addClassroomBtn">+ Report Issue</button>
+</div><div class="table-container"><table>
+<thead><tr><th>Date</th><th>Classroom/Facility</th><th>Item/Issue</th><th>Status</th><th>Date Broken</th><th>Reported By</th><th>Broken By</th><th>Notes</th><th>Actions</th></tr></thead>
+<tbody id="classroomTableBody"></tbody>
+</table></div></div></div>
+
+<!-- ANALYTICS -->
+<div class="tab-content" id="tab-analytics">
+<div class="card"><div class="card-header"><h2>📈 Analytics & Charts</h2></div>
+<div class="form-row" style="margin-bottom:15px">
+<div class="form-group"><label>Select Student</label><select id="analyticsStudentSelect" onchange="renderStudentCharts()"><option value="">Select a student</option></select></div>
+<div class="form-group"><label>Select Class</label><select id="analyticsClassSelect" onchange="renderClassCharts()"><option value="">Select a class</option></select></div>
+</div></div>
+<div class="charts-grid">
+<div class="card"><div class="card-header"><h3>📊 Student: Grades by Subject</h3></div><div class="chart-container"><canvas id="studentSubjectChart"></canvas></div></div>
+<div class="card"><div class="card-header"><h3>📈 Student: Grade Trend</h3></div><div class="chart-container"><canvas id="studentTrendChart"></canvas></div></div>
+<div class="card"><div class="card-header"><h3>📊 Class: Avg Grades by Subject</h3></div><div class="chart-container"><canvas id="classSubjectChart"></canvas></div></div>
+<div class="card"><div class="card-header"><h3>📊 Class: Student Comparison</h3></div><div class="chart-container"><canvas id="classComparisonChart"></canvas></div></div>
+</div></div>
+
+<!-- USERS -->
+<div class="tab-content" id="tab-users">
+<div class="card"><div class="card-header">
+<h2>👥 User Management</h2><button class="btn btn-primary" onclick="showAddUserModal()">+ Add User</button>
+</div><div class="table-container"><table>
+<thead><tr><th>Email</th><th>Full Name</th><th>Role</th><th>Class</th><th>Last Login</th><th>Logins</th><th>Actions</th></tr></thead>
+<tbody id="usersTableBody"></tbody>
+</table></div></div></div>
+
+<!-- AUDIT -->
+<div class="tab-content" id="tab-audit">
+<div class="card"><div class="card-header"><h2>🔍 Audit Log</h2></div>
+<div class="form-row" style="margin-bottom:15px">
+<div class="form-group"><label>User</label><select id="auditUserFilter" onchange="renderAuditLog()"><option value="">All</option></select></div>
+</div>
+<div id="auditLogContent"></div></div></div>
+
+</div></div></div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modalOverlay">
+<div class="modal"><div class="modal-header">
+<h2 id="modalTitle"></h2><button class="modal-close" onclick="closeModal()">&times;</button>
+</div><div id="modalBody"></div></div></div>
+
+<div class="modal-overlay" id="changePasswordModal">
+<div class="modal" style="max-width:400px"><div class="modal-header">
+<h2>🔑 Change Password</h2><button class="modal-close" onclick="document.getElementById('changePasswordModal').classList.remove('show')">&times;</button>
+</div>
+<div class="form-group"><label>Current Password</label><input type="password" id="currentPwd"></div>
+<div class="form-group"><label>New Password (min 6 chars)</label><input type="password" id="newPwd"></div>
+<div class="form-group"><label>Confirm</label><input type="password" id="confirmPwd"></div>
+<button class="btn btn-primary" onclick="changePassword()" style="width:100%;margin-top:10px">Update Password</button>
+</div></div>
+
+<script type="module">
+// ============================================================
+// 🔥 STEP A: FIREBASE IMPORTS (replaces the old mock functions)
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+  createUserWithEmailAndPassword, updatePassword, reauthenticateWithCredential,
+  EmailAuthProvider, sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
+  onSnapshot, getDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// ============================================================
+// 🔧 STEP B: PASTE YOUR FIREBASE CONFIG HERE
+// ============================================================
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Secondary app instance so Admin can create new users
+// without being logged out of their own session
+const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+const secondaryAuth = getAuth(secondaryApp);
+
+// ============================================================
+// APP CONSTANTS (unchanged from mock version)
+// ============================================================
+const CLASSES = [
+  'Grade 7 East','Grade 7 West','Grade 8 East','Grade 8 West',
+  'Grade 9 East','Grade 9 West','Grade 10 East','Grade 10 West',
+  'Form 3 East','Form 3 West','Form 4 East','Form 4 West'
+];
+const ROOMS = [...CLASSES, 'Computer Lab', 'Science Lab'];
+const PREFECT_DEPARTMENTS=['Head Prefect','Deputy Head Prefect','Academics','Discipline','Games & Sports','Entertainment','Health & Sanitation','Dining Hall','Dormitory/Boarding','Chapel/Spiritual','Environment','Class Prefect','Assistant Class Prefect'];
+const SUBJECTS=['Math','Kiswahili','English','Pretechnical','Social Studies','Science (Biology, Chemistry, Physics)','Creative Arts','C.R.E','Agriculture','History','Geography','Business Studies','Computer Studies','K.S.L','C.S.L','Home Science'];
+
+function getLevel(cls){if(!cls)return'';if(cls.startsWith('Grade 7')||cls.startsWith('Grade 8')||cls.startsWith('Grade 9'))return'Junior Secondary';if(cls.startsWith('Grade 10')||cls.startsWith('Form 3')||cls.startsWith('Form 4'))return'Senior Secondary';return''}
+function getStream(cls){if(!cls)return'';if(cls.includes('East'))return'East';if(cls.includes('West'))return'West';return''}
+function getLevelBadge(cls){const l=getLevel(cls);if(l==='Junior Secondary')return'<span class="level-badge level-junior">Junior Sec</span>';if(l==='Senior Secondary')return'<span class="level-badge level-senior">Senior Sec</span>';return'-'}
+function getStreamBadge(cls){const s=getStream(cls);if(s==='East')return'<span class="badge stream-east">🧭 East</span>';if(s==='West')return'<span class="badge stream-west">🧭 West</span>';return'-'}
+function getGradeColor(p){if(p>=80)return'#27ae60';if(p>=60)return'#f39c12';return'#e74c3c'}
+function getLetterGrade(p){if(p>=80)return'A';if(p>=70)return'B';if(p>=60)return'C';if(p>=50)return'D';return'F'}
+function gradeClass(p){return'grade-'+getLetterGrade(p)}
+function formatDate(d){if(!d)return'-';try{return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch(e){return'-'}}
+function formatTS(ts){if(!ts)return'-';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleString()}
+function classSelectHtml(){
+  let h='<option value="">All Classes</option>';
+  const groups={'Junior Secondary':['Grade 7 East','Grade 7 West','Grade 8 East','Grade 8 West','Grade 9 East','Grade 9 West'],'Senior Secondary':['Grade 10 East','Grade 10 West','Form 3 East','Form 3 West','Form 4 East','Form 4 West']};
+  for(const[g,cs]of Object.entries(groups)){h+=`<optgroup label="${g}">`;cs.forEach(c=>h+=`<option>${c}</option>`);h+='</optgroup>'}
+  return h;
+}
+function notify(m,t='success'){const n=document.createElement('div');n.className='notification '+t;n.textContent=m;document.body.appendChild(n);setTimeout(()=>n.remove(),3000)}
+function friendlyAuthError(code){
+  const map={'auth/invalid-email':'Invalid email address.','auth/user-disabled':'This account has been disabled.','auth/user-not-found':'No account found with this email.','auth/wrong-password':'Incorrect password.','auth/email-already-in-use':'This email is already registered.','auth/weak-password':'Password should be at least 6 characters.','auth/too-many-requests':'Too many attempts. Try again later.','auth/invalid-credential':'Invalid email or password.'};
+  return map[code]||('Error: '+code);
+}
+
+// ============================================================
+// STATE
+// ============================================================
+let currentUser=null;
+let activeTab='dashboard';
+let unsubscribers=[];
+let chartInstances={};
+
+let studentsCache=[], gradesCache=[], attendanceCache=[], registerCache=[],
+    warningsCache=[], suspensionsCache=[], expulsionsCache=[], clinicCache=[],
+    teachersCache=[], teacherAttCache=[], classroomCache=[], usersCache=[], auditCache=[];
+
+// ============================================================
+// PERMISSIONS
+// ============================================================
+function canEdit(tab){
+  if(!currentUser)return false;const r=currentUser.role;
+  if(r==='admin')return true;
+  if(r==='principal')return['grades','attendance','warnings','suspensions','expulsions','students','classRegister'].includes(tab);
+  if(r==='teacher')return['grades','attendance','classRegister'].includes(tab);
+  if(r==='nurse')return tab==='clinic';
+  if(r==='secretary')return true;
+  return false;
+}
+function canAdd(tab){return canEdit(tab)}
+function canDelete(){return currentUser&&currentUser.role==='admin'}
+
+async function addAuditLog(action,details){
+  try{
+    await addDoc(collection(db,'auditLog'),{
+      user:currentUser?currentUser.email:'system',
+      role:currentUser?currentUser.role:'',
+      action,details,time:serverTimestamp()
+    });
+  }catch(e){console.error('Audit log failed',e)}
+}
+
+// ============================================================
+// 🔥 STEP C: REAL AUTH FLOW (replaces mockSignIn)
+// ============================================================
+window.handleLogin=async function(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=true;btn.innerHTML='<span class="loading-spinner"></span>Signing in...';
+  try{
+    await signInWithEmailAndPassword(auth,email,password);
+    // onAuthStateChanged below handles the rest
+  }catch(err){
+    document.getElementById('loginError').textContent=friendlyAuthError(err.code);
+  }finally{
+    btn.disabled=false;btn.textContent='Sign In';
+  }
+};
+
+window.handleLogout=async function(){
+  await addAuditLog('LOGOUT','User logged out');
+  await signOut(auth);
+};
+
+// Real-time auth state listener replaces manual login state tracking
+onAuthStateChanged(auth, async (user)=>{
+  if(user){
+    try{
+      const snap=await getDoc(doc(db,'users',user.uid));
+      if(!snap.exists()){
+        await signOut(auth);
+        document.getElementById('loginError').textContent='Account not found. Contact admin.';
+        return;
+      }
+      currentUser={uid:user.uid,email:user.email,...snap.data()};
+      await updateDoc(doc(db,'users',user.uid),{lastLogin:serverTimestamp(),loginCount:(currentUser.loginCount||0)+1});
+      await addAuditLog('LOGIN','User logged in');
+      document.getElementById('loginPage').style.display='none';
+      document.getElementById('appContainer').style.display='block';
+      document.getElementById('currentUserDisplay').textContent=currentUser.fullName||currentUser.email;
+      document.getElementById('currentRoleBadge').textContent=(currentUser.role||'').toUpperCase();
+      setupRoleAccess();
+      startListeners();
+      showTab('dashboard');
+      notify('Welcome, '+(currentUser.fullName||currentUser.email)+'!');
+    }catch(e){
+      console.error(e);
+      document.getElementById('loginError').textContent='Error loading profile: '+e.message;
+    }
+  }else{
+    currentUser=null;
+    stopListeners();
+    document.getElementById('loginPage').style.display='flex';
+    document.getElementById('appContainer').style.display='none';
+    document.getElementById('loginEmail').value='';
+    document.getElementById('loginPassword').value='';
+  }
+});
+
+function setupRoleAccess(){
+  const r=currentUser.role;
+  document.getElementById('adminNavSection').style.display=r==='admin'?'block':'none';
+  document.getElementById('usersNavItem').style.display=r==='admin'?'flex':'none';
+  document.getElementById('auditNavItem').style.display=r==='admin'?'flex':'none';
+  const btnTabMap={addStudentBtn:'students',addGradeBtn:'grades',addAttendanceBtn:'attendance',addRegisterBtn:'classRegister',addWarningBtn:'warnings',addSuspensionBtn:'suspensions',addExpulsionBtn:'expulsions',addClinicBtn:'clinic'};
+  Object.entries(btnTabMap).forEach(([id,tab])=>{const el=document.getElementById(id);if(el)el.style.display=canAdd(tab)?'inline-block':'none'});
+  const tbtn=document.getElementById('addTeacherBtn');if(tbtn)tbtn.style.display=(r==='admin'||r==='principal')?'inline-block':'none';
+  const tabtn=document.getElementById('addTeacherAttBtn');if(tabtn)tabtn.style.display=(r==='admin'||r==='principal')?'inline-block':'none';
+  const crbtn=document.getElementById('addClassroomBtn');if(crbtn)crbtn.style.display=canAdd('classroom')?'inline-block':'none';
+}
+
+window.showChangePassword=function(){document.getElementById('changePasswordModal').classList.add('show')};
+window.changePassword=async function(){
+  const cur=document.getElementById('currentPwd').value,n=document.getElementById('newPwd').value,cn=document.getElementById('confirmPwd').value;
+  if(n.length<6){notify('Min 6 characters','error');return}
+  if(n!==cn){notify('Passwords do not match','error');return}
+  try{
+    const cred=EmailAuthProvider.credential(auth.currentUser.email,cur);
+    await reauthenticateWithCredential(auth.currentUser,cred);
+    await updatePassword(auth.currentUser,n);
+    await addAuditLog('PASSWORD_CHANGE','Changed own password');
+    document.getElementById('changePasswordModal').classList.remove('show');
+    ['currentPwd','newPwd','confirmPwd'].forEach(id=>document.getElementById(id).value='');
+    notify('Password changed');
+  }catch(err){notify(friendlyAuthError(err.code),'error')}
+};
+
+// ============================================================
+// 🔥 STEP D: REAL-TIME LISTENERS (replaces mockOnSnapshot)
+// Note: identical structure to mock version — only the
+// underlying onSnapshot() call is now real Firestore
+// ============================================================
+function startListeners(){
+  unsubscribers.push(onSnapshot(collection(db,'students'),snap=>{
+    studentsCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById('syncBadge').textContent='🟢 Live';
+    document.getElementById('syncBadge').className='sync-badge';
+    if(activeTab==='students')renderStudentTable();
+    if(activeTab==='dashboard')renderDashboard();
+    populateAnalyticsSelects();
+  },err=>{document.getElementById('syncBadge').textContent='🔴 Offline';document.getElementById('syncBadge').className='sync-badge offline'}));
+
+  unsubscribers.push(onSnapshot(collection(db,'grades'),snap=>{
+    gradesCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(activeTab==='grades')renderGradesTable();
+    if(activeTab==='dashboard')renderDashboard();
+    if(activeTab==='teachers')renderTeacherPerfChart();
+    if(activeTab==='analytics'){
+      if(document.getElementById('analyticsStudentSelect')?.value)renderStudentCharts();
+      if(document.getElementById('analyticsClassSelect')?.value)renderClassCharts();
+    }
+  }));
+
+  unsubscribers.push(onSnapshot(collection(db,'attendance'),snap=>{
+    attendanceCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(activeTab==='attendance')renderAttendanceTable();
+    if(activeTab==='dashboard')renderDashboard();
+  }));
+
+  unsubscribers.push(onSnapshot(collection(db,'register'),snap=>{
+    registerCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(activeTab==='classRegister')renderClassRegister();
+  }));
+
+  unsubscribers.push(onSnapshot(collection(db,'warnings'),snap=>{
+    warningsCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(activeTab==='warnings')renderWarningsTable();
+    if(activeTab==='dashboard')renderDashboard();
+  }));
+
+  unsubscribers.push(onSnapshot(collection(db,'suspensions'),snap=>{
+    suspensionsCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(activeTab==='suspensions')renderSuspensionsTable();
+    if(activeTab==='dashboard')renderDashboard();
+  }));
+
+  unsubscribers.push(onSnapshot(collection(db,'expulsions'),snap=>{
+    expulsionsCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(activeTab==='expulsions')renderExpulsionsTable();
+  }));
+
+  unsubscribers.push(onSnapshot(collection(db,'clinic'),snap=>{
+    clinicCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(activeTab==='clinic')renderClinicTable();
+    if(activeTab==='dashboard')renderDashboard();
+  }));
+
+  unsubscribers.push(onSnapshot(collection(db,'teachers'),snap=>{
+    teachersCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(activeTab==='teachers'){renderTeachersTable();renderTeacherPerfChart()}
+  }));
+
+  unsubscribers.push(onSnapshot(collection(db,'teacherAttendance'),snap=>{
+    teacherAttCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(activeTab==='teacherAttendance')renderTeacherAttendance();
+  }));
+
+  unsubscribers.push(onSnapshot(collection(db,'classroom'),snap=>{
+    classroomCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(activeTab==='classroom')renderClassroomTable();
+  }));
+
+  unsubscribers.push(onSnapshot(collection(db,'users'),snap=>{
+    usersCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(activeTab==='users')renderUsersTable();
+    populateAuditFilter();
+  }));
+
+  unsubscribers.push(onSnapshot(collection(db,'auditLog'),snap=>{
+    auditCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(activeTab==='audit')renderAuditLog();
+  }));
+}
+function stopListeners(){unsubscribers.forEach(u=>u());unsubscribers=[]}
+
+// ============================================================
+// NAVIGATION (unchanged)
+// ============================================================
+window.showTab=function(tabName){
+  activeTab=tabName;
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const tab=document.getElementById('tab-'+tabName);if(tab)tab.classList.add('active');
+  const nav=document.querySelector(`[data-tab="${tabName}"]`);if(nav)nav.classList.add('active');
+  switch(tabName){
+    case'dashboard':renderDashboard();break;
+    case'students':populateAttendanceFilters();populateRegisterFilters();populateGradeFilters();renderStudentTable();break;
+    case'grades':populateGradeFilters();renderGradesTable();break;
+    case'attendance':populateAttendanceFilters();renderAttendanceTable();break;
+    case'classRegister':populateRegisterFilters();renderClassRegister();break;
+    case'warnings':renderWarningsTable();break;
+    case'suspensions':renderSuspensionsTable();break;
+    case'expulsions':renderExpulsionsTable();break;
+    case'clinic':renderClinicTable();break;
+    case'teachers':renderTeachersTable();renderTeacherPerfChart();break;
+    case'teacherAttendance':renderTeacherAttendance();break;
+    case'classroom':renderClassroomTable();break;
+    case'analytics':populateAnalyticsSelects();break;
+    case'users':renderUsersTable();break;
+    case'audit':populateAuditFilter();renderAuditLog();break;
+  }
+  document.getElementById('sidebar').classList.remove('show');
+};
+window.toggleSidebar=function(){document.getElementById('sidebar').classList.toggle('show')};
+window.openModal=function(t,h){document.getElementById('modalTitle').textContent=t;document.getElementById('modalBody').innerHTML=h;document.getElementById('modalOverlay').classList.add('show')};
+window.closeModal=function(){document.getElementById('modalOverlay').classList.remove('show')};
+function destroyChart(id){if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id]}}
+
+// ============================================================
+// DASHBOARD (unchanged from mock version — reads from cache)
+// ============================================================
+function renderDashboard(){
+  const students=studentsCache,grades=gradesCache,attendance=attendanceCache,clinic=clinicCache,warnings=warningsCache,suspensions=suspensionsCache;
+  const today=new Date().toISOString().split('T')[0];
+  const present=attendance.filter(a=>a.date===today&&a.status==='Present').length;
+  const jun=students.filter(s=>getLevel(s.class)==='Junior Secondary').length;
+  const sen=students.filter(s=>getLevel(s.class)==='Senior Secondary').length;
+  const prefects=students.filter(s=>s.isPrefect==='Yes').length;
+
+  document.getElementById('dashboardStats').innerHTML=`
+    <div class="stat-card"><div class="stat-number">${students.length}</div><div class="stat-label">Total Students</div></div>
+    <div class="stat-card" style="border-top-color:#8e44ad"><div class="stat-number">${jun}</div><div class="stat-label">Junior Sec (Gr 7-9)</div></div>
+    <div class="stat-card" style="border-top-color:#2980b9"><div class="stat-number">${sen}</div><div class="stat-label">Senior Sec (Gr 10, F3-4)</div></div>
+    <div class="stat-card" style="border-top-color:#27ae60"><div class="stat-number">${present}</div><div class="stat-label">Present Today</div></div>
+    <div class="stat-card" style="border-top-color:#d4ac0d"><div class="stat-number">${prefects}</div><div class="stat-label">⭐ Prefects</div></div>
+    <div class="stat-card" style="border-top-color:#f39c12"><div class="stat-number">${warnings.length}</div><div class="stat-label">Warnings</div></div>
+    <div class="stat-card" style="border-top-color:#e74c3c"><div class="stat-number">${suspensions.length}</div><div class="stat-label">Suspensions</div></div>
+    <div class="stat-card" style="border-top-color:#16a085"><div class="stat-number">${clinic.length}</div><div class="stat-label">Clinic Visits</div></div>
+    <div class="stat-card" style="border-top-color:#2e86c1"><div class="stat-number">${grades.length}</div><div class="stat-label">Grade Records</div></div>`;
+
+  const boarders=students.filter(s=>s.status==='Boarder').length;
+  const dayScholars=students.filter(s=>s.status==='Day Scholar').length;
+  const bBoys=students.filter(s=>s.status==='Boarder'&&s.gender==='Male').length;
+  const bGirls=students.filter(s=>s.status==='Boarder'&&s.gender==='Female').length;
+  const dBoys=students.filter(s=>s.status==='Day Scholar'&&s.gender==='Male').length;
+  const dGirls=students.filter(s=>s.status==='Day Scholar'&&s.gender==='Female').length;
+  document.getElementById('boardingStats').innerHTML=`
+    <div class="stat-card" style="border-top-color:#2980b9"><div class="stat-number">${boarders}</div><div class="stat-label">🏠 Total Boarders</div></div>
+    <div class="stat-card" style="border-top-color:#3498db"><div class="stat-number">${bBoys}</div><div class="stat-label">👦 Boarder Boys</div></div>
+    <div class="stat-card" style="border-top-color:#e91e8c"><div class="stat-number">${bGirls}</div><div class="stat-label">👧 Boarder Girls</div></div>
+    <div class="stat-card" style="border-top-color:#f39c12"><div class="stat-number">${dayScholars}</div><div class="stat-label">🚶 Day Scholars</div></div>
+    <div class="stat-card" style="border-top-color:#e67e22"><div class="stat-number">${dBoys}</div><div class="stat-label">👦 Day Scholar Boys</div></div>
+    <div class="stat-card" style="border-top-color:#d35400"><div class="stat-number">${dGirls}</div><div class="stat-label">👧 Day Scholar Girls</div></div>`;
+
+  const tB=students.filter(s=>s.gender==='Male').length,tG=students.filter(s=>s.gender==='Female').length;
+  const bPct=students.length?Math.round(tB/students.length*100):0,gPct=students.length?Math.round(tG/students.length*100):0;
+  document.getElementById('genderStats').innerHTML=`
+    <div class="stat-card" style="border-top-color:#3498db"><div class="stat-number">${tB}</div><div class="stat-label">👦 Total Boys</div></div>
+    <div class="stat-card" style="border-top-color:#e91e8c"><div class="stat-number">${tG}</div><div class="stat-label">👧 Total Girls</div></div>
+    <div class="stat-card" style="border-top-color:#3498db"><div class="stat-number">${bPct}%</div><div class="stat-label">Boys Ratio</div></div>
+    <div class="stat-card" style="border-top-color:#e91e8c"><div class="stat-number">${gPct}%</div><div class="stat-label">Girls Ratio</div></div>`;
+
+  const streamData={};CLASSES.forEach(c=>streamData[c]=students.filter(s=>s.class===c).length);
+  destroyChart('dashLevelChart');
+  chartInstances['dashLevelChart']=new Chart(document.getElementById('dashLevelChart'),{type:'bar',data:{labels:CLASSES,datasets:[{data:CLASSES.map(c=>streamData[c]),backgroundColor:CLASSES.map(c=>c.includes('East')?'#3498db':'#e67e22')}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{ticks:{maxRotation:45}}}}});
+
+  const dist={A:0,B:0,C:0,D:0,F:0};grades.forEach(g=>dist[getLetterGrade((g.test1||0)+(g.test2||0)+(g.exam||0))]++);
+  destroyChart('dashGradeChart');
+  chartInstances['dashGradeChart']=new Chart(document.getElementById('dashGradeChart'),{type:'bar',data:{labels:Object.keys(dist),datasets:[{data:Object.values(dist),backgroundColor:['#27ae60','#2ecc71','#f39c12','#e67e22','#e74c3c']}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+
+  const last7=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);last7.push(d.toISOString().split('T')[0])}
+  const attData=last7.map(d=>attendance.filter(a=>a.date===d&&a.status==='Present').length);
+  destroyChart('dashAttendanceChart');
+  chartInstances['dashAttendanceChart']=new Chart(document.getElementById('dashAttendanceChart'),{type:'line',data:{labels:last7.map(formatDate),datasets:[{data:attData,borderColor:'#2e86c1',fill:true,tension:0.3,pointRadius:5}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+
+  const mc=new Date().toISOString().slice(0,7);const cd={};clinic.filter(c=>c.date&&c.date.startsWith(mc)).forEach(c=>cd[c.date]=(cd[c.date]||0)+1);
+  const ck=Object.keys(cd).sort();
+  destroyChart('dashClinicChart');
+  chartInstances['dashClinicChart']=new Chart(document.getElementById('dashClinicChart'),{type:'bar',data:{labels:ck.map(formatDate),datasets:[{data:ck.map(k=>cd[k]),backgroundColor:'#e74c3c'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+}
+
+// ============================================================
+// STUDENTS — save functions now use real Firestore
+// ============================================================
+window.showAddStudentModal=function(editId){
+  const s=editId?studentsCache.find(x=>x.id===editId):null;
+  openModal(s?'Edit Student':'Add New Student',`
+    <div class="form-grid">
+      <div class="form-group"><label>Admission Number *</label><input type="text" id="s_admNo" value="${s?s.admNo:''}"></div>
+      <div class="form-group"><label>First Name *</label><input type="text" id="s_firstName" value="${s?s.firstName:''}"></div>
+      <div class="form-group"><label>Last Name *</label><input type="text" id="s_lastName" value="${s?s.lastName:''}"></div>
+      <div class="form-group"><label>Class/Grade & Stream *</label><select id="s_class">
+        <optgroup label="Junior Secondary">${['Grade 7 East','Grade 7 West','Grade 8 East','Grade 8 West','Grade 9 East','Grade 9 West'].map(c=>`<option ${s&&s.class===c?'selected':''}>${c}</option>`).join('')}</optgroup>
+        <optgroup label="Senior Secondary">${['Grade 10 East','Grade 10 West','Form 3 East','Form 3 West','Form 4 East','Form 4 West'].map(c=>`<option ${s&&s.class===c?'selected':''}>${c}</option>`).join('')}</optgroup>
+      </select></div>
+      <div class="form-group"><label>Gender</label><select id="s_gender"><option value="Male" ${s&&s.gender==='Male'?'selected':''}>Male</option><option value="Female" ${s&&s.gender==='Female'?'selected':''}>Female</option></select></div>
+      <div class="form-group"><label>Date of Birth</label><input type="date" id="s_dob" value="${s?s.dob||'':''}"></div>
+      <div class="form-group"><label>Status</label><select id="s_status"><option value="Boarder" ${s&&s.status==='Boarder'?'selected':''}>Boarder</option><option value="Day Scholar" ${s&&s.status==='Day Scholar'?'selected':''}>Day Scholar</option></select></div>
+      <div class="form-group"><label>Location</label><input type="text" id="s_location" value="${s?s.location||'':''}"></div>
+      <div class="form-group"><label>Is Prefect?</label><select id="s_isPrefect" onchange="togglePrefectDept()"><option value="No" ${!(s&&s.isPrefect==='Yes')?'selected':''}>No</option><option value="Yes" ${s&&s.isPrefect==='Yes'?'selected':''}>Yes</option></select></div>
+      <div class="form-group" id="prefectDeptGroup" style="display:${s&&s.isPrefect==='Yes'?'block':'none'}"><label>Prefect Department</label><select id="s_prefectDept"><option value="">-- Select --</option>${PREFECT_DEPARTMENTS.map(d=>`<option ${s&&s.prefectDept===d?'selected':''}>${d}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Parent/Guardian Name</label><input type="text" id="s_parent" value="${s?s.parent||'':''}"></div>
+      <div class="form-group"><label>Parent/Guardian Phone</label><input type="text" id="s_parentPhone" value="${s?s.parentPhone||'':''}"></div>
+      <div class="form-group"><label>Parent/Guardian Email</label><input type="email" id="s_parentEmail" value="${s?s.parentEmail||'':''}"></div>
+      <div class="form-group"><label>Student Photo (keep small, <200KB)</label><input type="file" id="s_photo" accept="image/*" onchange="previewPhoto(this)"><img id="photoPreview" style="max-width:100px;max-height:100px;margin-top:5px;border-radius:8px;display:${s&&s.photo?'block':'none'}" src="${s?s.photo||'':''}"></div>
+    </div>
+    <div class="form-group"><label>Health History</label><textarea id="s_health" rows="3">${s?s.health||'':''}</textarea></div>
+    <div class="form-group"><label>Notes</label><textarea id="s_notes" rows="2">${s?s.notes||'':''}</textarea></div>
+    <button class="btn btn-success" onclick="saveStudent('${editId||''}')" style="width:100%;margin-top:10px">${s?'Update':'Save'} Student</button>`);
+};
+window.togglePrefectDept=function(){document.getElementById('prefectDeptGroup').style.display=document.getElementById('s_isPrefect').value==='Yes'?'block':'none'};
+window.previewPhoto=function(input){if(input.files&&input.files[0]){const r=new FileReader();r.onload=e=>{const i=document.getElementById('photoPreview');i.src=e.target.result;i.style.display='block'};r.readAsDataURL(input.files[0])}};
+
+window.saveStudent=async function(editId){
+  const admNo=document.getElementById('s_admNo').value.trim(),fn=document.getElementById('s_firstName').value.trim(),ln=document.getElementById('s_lastName').value.trim();
+  if(!admNo||!fn||!ln){notify('Fill required fields','error');return}
+  const pe=document.getElementById('photoPreview');
+  const photo=pe&&pe.src&&!pe.src.endsWith('/')?pe.src:'';
+  const isPrefect=document.getElementById('s_isPrefect').value;
+  const d={admNo,firstName:fn,lastName:ln,class:document.getElementById('s_class').value,gender:document.getElementById('s_gender').value,dob:document.getElementById('s_dob').value,status:document.getElementById('s_status').value,location:document.getElementById('s_location').value,isPrefect,prefectDept:isPrefect==='Yes'?document.getElementById('s_prefectDept').value:'',parent:document.getElementById('s_parent').value,parentPhone:document.getElementById('s_parentPhone').value,parentEmail:document.getElementById('s_parentEmail').value,photo,health:document.getElementById('s_health').value,notes:document.getElementById('s_notes').value};
+  try{
+    if(editId){await updateDoc(doc(db,'students',editId),d);await addAuditLog('EDIT_STUDENT','Edited: '+fn+' '+ln)}
+    else{d.createdAt=serverTimestamp();await addDoc(collection(db,'students'),d);await addAuditLog('ADD_STUDENT','Added: '+fn+' '+ln)}
+    closeModal();notify(editId?'Student updated':'Student added');
+  }catch(e){notify('Error: '+e.message,'error')}
+};
+
+window.renderStudentTable=function(){
+  const s=(document.getElementById('studentSearch').value||'').toLowerCase();
+  const lf=document.getElementById('studentLevelFilter').value,sf=document.getElementById('studentStreamFilter').value,pf=document.getElementById('studentPrefectFilter').value,stf=document.getElementById('studentStatusFilter').value,gf=document.getElementById('studentGenderFilter').value;
+  const filtered=studentsCache.filter(st=>{
+    if(s&&!((st.firstName+' '+st.lastName).toLowerCase().includes(s)||(st.admNo||'').toLowerCase().includes(s)))return false;
+    if(lf&&!st.class.startsWith(lf))return false;
+    if(sf&&!st.class.includes(sf))return false;
+    if(pf&&(st.isPrefect||'No')!==pf)return false;
+    if(stf&&st.status!==stf)return false;
+    if(gf&&st.gender!==gf)return false;
+    return true;
+  });
+  document.getElementById('studentTableBody').innerHTML=filtered.map(st=>`<tr>
+    <td>${st.photo?`<img src="${st.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:'👤'}</td>
+    <td>${st.admNo}</td>
+    <td><a href="#" onclick="viewStudent('${st.id}');return false" style="color:var(--secondary);font-weight:600">${st.firstName} ${st.lastName}</a></td>
+    <td>${st.class}</td><td>${getStreamBadge(st.class)}</td><td>${getLevelBadge(st.class)}</td>
+    <td>${st.isPrefect==='Yes'?`<span class="badge badge-prefect">⭐ ${st.prefectDept||'Prefect'}</span>`:'-'}</td>
+    <td><span class="badge ${st.status==='Boarder'?'badge-info':'badge-warning'}">${st.status||'-'}</span></td>
+    <td>${st.parent||'-'}</td>
+    <td>${canEdit('students')?`<button class="btn btn-sm btn-primary" onclick="showAddStudentModal('${st.id}')">Edit</button>`:''}${canDelete()?` <button class="btn btn-sm btn-danger" onclick="deleteStudent('${st.id}')">Del</button>`:''}</td>
+  </tr>`).join('');
+};
+
+window.deleteStudent=async function(id){
+  if(!confirm('Delete this student?'))return;
+  const s=studentsCache.find(x=>x.id===id);
+  await deleteDoc(doc(db,'students',id));
+  await addAuditLog('DELETE_STUDENT','Deleted: '+(s?s.firstName+' '+s.lastName:id));
+  notify('Deleted');
+};
+
+window.viewStudent=function(sid){
+  const s=studentsCache.find(x=>x.id===sid);if(!s)return;
+  const grades=gradesCache.filter(g=>g.studentId===sid);
+  const att=attendanceCache.filter(a=>a.studentId===sid);
+  const warnings=warningsCache.filter(w=>w.studentId===sid);
+  const susp=suspensionsCache.filter(x=>x.studentId===sid);
+  const clin=clinicCache.filter(x=>x.studentId===sid);
+  const ta=att.length,pa=att.filter(a=>a.status==='Present').length,ap=ta?Math.round(pa/ta*100):0;
+  const ag=grades.length?Math.round(grades.reduce((sum,g)=>sum+(g.test1||0)+(g.test2||0)+(g.exam||0),0)/grades.length):0;
+
+  let h=`<div class="student-profile">
+    <div>${s.photo?`<img src="${s.photo}" class="student-photo">`:'<div class="student-photo">👤</div>'}</div>
+    <div class="student-info-grid">
+      <h2 style="color:var(--primary);margin-bottom:10px">${s.firstName} ${s.lastName} ${s.isPrefect==='Yes'?'⭐':''}</h2>
+      <div class="info-row"><div class="info-label">Admission No.</div><div class="info-value">${s.admNo}</div></div>
+      <div class="info-row"><div class="info-label">Class/Grade</div><div class="info-value">${s.class} ${getStreamBadge(s.class)} ${getLevelBadge(s.class)}</div></div>
+      <div class="info-row"><div class="info-label">Gender</div><div class="info-value">${s.gender||'-'}</div></div>
+      <div class="info-row"><div class="info-label">Date of Birth</div><div class="info-value">${formatDate(s.dob)}</div></div>
+      <div class="info-row"><div class="info-label">Status</div><div class="info-value"><span class="badge ${s.status==='Boarder'?'badge-info':'badge-warning'}">${s.status||'-'}</span></div></div>
+      <div class="info-row"><div class="info-label">Location</div><div class="info-value">${s.location||'-'}</div></div>
+      <div class="info-row"><div class="info-label">Prefect Status</div><div class="info-value">${s.isPrefect==='Yes'?`⭐ Yes — ${s.prefectDept||'-'}`:'No'}</div></div>
+      <div class="info-row"><div class="info-label">Parent/Guardian</div><div class="info-value">${s.parent||'-'}</div></div>
+      <div class="info-row"><div class="info-label">Parent Phone</div><div class="info-value">${s.parentPhone||'-'}</div></div>
+      <div class="info-row"><div class="info-label">Health History</div><div class="info-value">${s.health||'-'}</div></div>
+    </div></div>
+    <div class="stats-grid" style="margin-top:20px">
+      <div class="stat-card"><div class="stat-number" style="color:${getGradeColor(ag)}">${ag}%</div><div class="stat-label">Average Grade</div></div>
+      <div class="stat-card" style="border-top-color:#27ae60"><div class="stat-number">${ap}%</div><div class="stat-label">Attendance</div></div>
+      <div class="stat-card" style="border-top-color:#f39c12"><div class="stat-number">${warnings.length}</div><div class="stat-label">Warnings</div></div>
+      <div class="stat-card" style="border-top-color:#e74c3c"><div class="stat-number">${susp.length}</div><div class="stat-label">Suspensions</div></div>
+      <div class="stat-card" style="border-top-color:#8e44ad"><div class="stat-number">${clin.length}</div><div class="stat-label">Clinic Visits</div></div>
+    </div>
+    <div class="charts-grid" style="margin-top:20px"><div class="card"><div class="card-header"><h3>📊 Grades by Subject</h3></div><div class="chart-container"><canvas id="detailSubjectChart"></canvas></div></div><div class="card"><div class="card-header"><h3>📈 Grade Trend</h3></div><div class="chart-container"><canvas id="detailTrendChart"></canvas></div></div></div>`;
+
+  document.getElementById('studentDetailContent').innerHTML=h;
+  showTab('studentDetail');
+
+  setTimeout(()=>{
+    const sg={};grades.forEach(g=>{if(!sg[g.subject])sg[g.subject]=[];sg[g.subject].push((g.test1||0)+(g.test2||0)+(g.exam||0))});
+    const sl=Object.keys(sg),sa=sl.map(s=>Math.round(sg[s].reduce((a,b)=>a+b,0)/sg[s].length));
+    destroyChart('detailSubjectChart');
+    if(sl.length)chartInstances['detailSubjectChart']=new Chart(document.getElementById('detailSubjectChart'),{type:'bar',data:{labels:sl,datasets:[{data:sa,backgroundColor:sa.map(getGradeColor)}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100}},plugins:{legend:{display:false}}}});
+    const terms=['Term 1','Term 2','Term 3'],tvs=terms.map(t=>{const tg=grades.filter(g=>g.term===t);return tg.length?Math.round(tg.reduce((s,g)=>s+(g.test1||0)+(g.test2||0)+(g.exam||0),0)/tg.length):null});
+    const vt=terms.filter((_,i)=>tvs[i]!==null),va=tvs.filter(v=>v!==null);
+    destroyChart('detailTrendChart');
+    if(vt.length)chartInstances['detailTrendChart']=new Chart(document.getElementById('detailTrendChart'),{type:'line',data:{labels:vt,datasets:[{data:va,borderColor:'#2e86c1',fill:true,tension:0.3,pointRadius:6,pointBackgroundColor:va.map(getGradeColor)}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100}}}});
+  },100);
+};
+
+// ============================================================
+// GRADES
+// ============================================================
+function populateGradeFilters(){
+  const c=document.getElementById('gradeClassFilter'),s=document.getElementById('gradeSubjectFilter');
+  if(c.options.length<=1)c.innerHTML=classSelectHtml();
+  if(s.options.length<=1)SUBJECTS.forEach(sub=>{const o=document.createElement('option');o.textContent=sub;s.appendChild(o)});
+}
+window.showAddGradeModal=function(editId){
+  const g=editId?gradesCache.find(x=>x.id===editId):null;
+  openModal(g?'Edit Grade':'Add Grade',`
+    <div class="form-grid">
+      <div class="form-group"><label>Student *</label><select id="g_student">${studentsCache.map(s=>`<option value="${s.id}" ${g&&g.studentId===s.id?'selected':''}>${s.firstName} ${s.lastName} (${s.class})</option>`).join('')}</select></div>
+      <div class="form-group"><label>Subject *</label><select id="g_subject">${SUBJECTS.map(s=>`<option ${g&&g.subject===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Term *</label><select id="g_term"><option ${g&&g.term==='Term 1'?'selected':''}>Term 1</option><option ${g&&g.term==='Term 2'?'selected':''}>Term 2</option><option ${g&&g.term==='Term 3'?'selected':''}>Term 3</option></select></div>
+      <div class="form-group"><label>Test 1 (/30)</label><input type="number" id="g_test1" value="${g?g.test1||0:0}"></div>
+      <div class="form-group"><label>Test 2 (/30)</label><input type="number" id="g_test2" value="${g?g.test2||0:0}"></div>
+      <div class="form-group"><label>Exam (/70)</label><input type="number" id="g_exam" value="${g?g.exam||0:0}"></div>
+    </div>
+    <button class="btn btn-success" onclick="saveGrade('${editId||''}')" style="width:100%;margin-top:10px">Save</button>`);
+};
+window.saveGrade=async function(editId){
+  const d={studentId:document.getElementById('g_student').value,subject:document.getElementById('g_subject').value,term:document.getElementById('g_term').value,test1:parseInt(document.getElementById('g_test1').value)||0,test2:parseInt(document.getElementById('g_test2').value)||0,exam:parseInt(document.getElementById('g_exam').value)||0};
+  const st=studentsCache.find(s=>s.id===d.studentId);
+  try{
+    if(editId)await updateDoc(doc(db,'grades',editId),d);
+    else{d.recordedBy=currentUser.email;d.createdAt=serverTimestamp();await addDoc(collection(db,'grades'),d)}
+    await addAuditLog(editId?'EDIT_GRADE':'ADD_GRADE',`${st?st.firstName+' '+st.lastName:'?'} - ${d.subject}`);
+    closeModal();notify('Grade saved');
+  }catch(e){notify('Error: '+e.message,'error')}
+};
+window.renderGradesTable=function(){
+  let grades=gradesCache;
+  const cf=document.getElementById('gradeClassFilter').value,sf=document.getElementById('gradeSubjectFilter').value,tf=document.getElementById('gradeTermFilter').value;
+  if(cf)grades=grades.filter(g=>{const s=studentsCache.find(x=>x.id===g.studentId);return s&&s.class===cf});
+  if(sf)grades=grades.filter(g=>g.subject===sf);if(tf)grades=grades.filter(g=>g.term===tf);
+  document.getElementById('gradesTableBody').innerHTML=grades.map(g=>{const s=studentsCache.find(x=>x.id===g.studentId);const t=(g.test1||0)+(g.test2||0)+(g.exam||0);
+    return`<tr><td>${s?s.firstName+' '+s.lastName:'?'}</td><td>${s?s.class:'-'}</td><td>${g.subject}</td><td>${g.term}</td><td>${g.test1||0}</td><td>${g.test2||0}</td><td>${g.exam||0}</td><td><strong>${t}</strong></td><td class="${gradeClass(t)}">${getLetterGrade(t)}</td><td>${canEdit('grades')?`<button class="btn btn-sm btn-primary" onclick="showAddGradeModal('${g.id}')">Edit</button>`:''}${canDelete()?` <button class="btn btn-sm btn-danger" onclick="deleteRecord('grades','${g.id}')">Del</button>`:''}</td></tr>`;
+  }).join('');
+};
+
+// ============================================================
+// ATTENDANCE (deterministic doc ID: studentId_date)
+// ============================================================
+function populateAttendanceFilters(){const c=document.getElementById('attendanceClassFilter');if(c.options.length<=1)c.innerHTML=classSelectHtml()}
+window.showAddAttendanceModal=function(){
+  const today=new Date().toISOString().split('T')[0];
+  openModal('Mark Attendance',`
+    <div class="form-group"><label>Date</label><input type="date" id="a_date" value="${today}"></div>
+    <div class="form-group"><label>Class Filter</label><select id="a_classFilter" onchange="document.querySelectorAll('.att-student').forEach(el=>{el.style.display=(!this.value||el.dataset.cls===this.value)?'flex':'none'})"><option value="">All</option>${CLASSES.map(c=>`<option>${c}</option>`).join('')}</select></div>
+    ${studentsCache.map(s=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #eee;flex-wrap:wrap" class="att-student" data-cls="${s.class}">
+      <span style="flex:1;min-width:150px;font-size:0.85em">${s.firstName} ${s.lastName} <span style="color:#999">(${s.class})</span></span>
+      <select id="att_${s.id}" style="width:110px;padding:4px" onchange="document.getElementById('attr_${s.id}').style.display=this.value==='Absent'?'inline-block':'none'"><option>Present</option><option>Absent</option><option>Late</option><option>Excused</option></select>
+      <input type="text" id="attr_${s.id}" placeholder="Reason" style="width:160px;padding:4px;font-size:0.8em;display:none">
+    </div>`).join('')}
+    <button class="btn btn-success" onclick="saveAttendance()" style="width:100%;margin-top:15px">Save</button>`);
+};
+window.saveAttendance=async function(){
+  const date=document.getElementById('a_date').value;if(!date){notify('Select date','error');return}
+  const cf=document.getElementById('a_classFilter').value;let c=0;
+  const promises=[];
+  studentsCache.forEach(s=>{
+    const sel=document.getElementById('att_'+s.id);if(!sel)return;
+    if(cf&&s.class!==cf)return;
+    const reasonEl=document.getElementById('attr_'+s.id);
+    const reason=sel.value==='Absent'?(reasonEl?reasonEl.value:''):'';
+    const id=s.id+'_'+date;
+    promises.push(setDoc(doc(db,'attendance',id),{studentId:s.id,date,status:sel.value,reason,markedBy:currentUser.email,createdAt:serverTimestamp()}));
+    c++;
+  });
+  try{
+    await Promise.all(promises);
+    await addAuditLog('ADD_ATTENDANCE',`${c} students on ${date}`);
+    closeModal();notify(`Attendance: ${c} students`);
+  }catch(e){notify('Error: '+e.message,'error')}
+};
+window.renderAttendanceTable=function(){
+  let att=attendanceCache;
+  const df=document.getElementById('attendanceDateFilter').value,cf=document.getElementById('attendanceClassFilter').value;
+  if(df)att=att.filter(a=>a.date===df);
+  if(cf)att=att.filter(a=>{const s=studentsCache.find(x=>x.id===a.studentId);return s&&s.class===cf});
+  att=[...att].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  document.getElementById('attendanceTableBody').innerHTML=att.map(a=>{const s=studentsCache.find(x=>x.id===a.studentId);
+    return`<tr><td>${formatDate(a.date)}</td><td>${s?s.firstName+' '+s.lastName:'?'}</td><td>${s?s.class:'-'}</td><td><span class="badge ${a.status==='Present'?'badge-success':a.status==='Absent'?'badge-danger':'badge-warning'}">${a.status}</span></td><td>${a.reason||'-'}</td><td>${a.markedBy||'-'}</td><td>${canDelete()?`<button class="btn btn-sm btn-danger" onclick="deleteRecord('attendance','${a.id}')">Del</button>`:''}</td></tr>`;
+  }).join('');
+};
+
+// ============================================================
+// CLASS REGISTER (deterministic ID: studentId_date)
+// ============================================================
+function populateRegisterFilters(){const c=document.getElementById('registerClassFilter');if(c.options.length<=1)c.innerHTML=classSelectHtml();document.getElementById('registerDateFilter').value=new Date().toISOString().split('T')[0]}
+window.showClassRegisterModal=function(){
+  const cls=prompt('Enter class (e.g. Grade 7 East, Form 3 West):');if(!cls)return;
+  const students=studentsCache.filter(s=>s.class===cls);
+  if(!students.length){notify('No students in this class','error');return}
+  openModal('Register - '+cls,`
+    <div class="form-group"><label>Date</label><input type="text" id="reg_date" value="${new Date().toISOString().split('T')[0]}" readonly></div>
+    ${students.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #eee"><span style="flex:1;font-size:0.85em">${s.firstName} ${s.lastName} (${s.admNo})</span><select id="reg_${s.id}" style="width:100px;padding:4px" onchange="document.getElementById('regr_${s.id}').style.display=this.value==='Absent'?'inline-block':'none'"><option>Present</option><option>Absent</option></select><input type="text" id="regr_${s.id}" placeholder="Reason" style="width:200px;padding:4px;font-size:0.8em;display:none"></div>`).join('')}
+    <button class="btn btn-success" onclick="saveRegister('${cls}')" style="width:100%;margin-top:15px">Save</button>`);
+};
+window.saveRegister=async function(cls){
+  const date=document.getElementById('reg_date').value,students=studentsCache.filter(s=>s.class===cls);
+  const promises=students.map(s=>{
+    const st=document.getElementById('reg_'+s.id).value,r=document.getElementById('regr_'+s.id).value;
+    const id=s.id+'_'+date;
+    return setDoc(doc(db,'register',id),{studentId:s.id,class:cls,date,status:st,reason:st==='Absent'?r:'',markedBy:currentUser.fullName,time:new Date().toLocaleTimeString()});
+  });
+  try{await Promise.all(promises);await addAuditLog('CLASS_REGISTER',`${cls} on ${date}`);closeModal();notify('Register saved')}
+  catch(e){notify('Error: '+e.message,'error')}
+};
+window.renderClassRegister=function(){
+  const cls=document.getElementById('registerClassFilter').value,date=document.getElementById('registerDateFilter').value;
+  if(!cls||!date){document.getElementById('registerTableBody').innerHTML='<tr><td colspan="5" style="text-align:center;color:#999">Select class and date</td></tr>';return}
+  const reg=registerCache.filter(r=>r.class===cls&&r.date===date);
+  document.getElementById('registerTableBody').innerHTML=reg.map(r=>{const s=studentsCache.find(x=>x.id===r.studentId);
+    return`<tr><td>${s?s.firstName+' '+s.lastName:'?'}</td><td><span class="badge ${r.status==='Present'?'badge-success':'badge-danger'}">${r.status}</span></td><td>${r.reason||'-'}</td><td>${r.markedBy||'-'}</td><td>${r.time||'-'}</td></tr>`;
+  }).join('')||'<tr><td colspan="5" style="text-align:center;color:#999">No records</td></tr>';
+};
+
+// ============================================================
+// DISCIPLINE
+// ============================================================
+window.showAddWarningModal=function(eid){
+  const w=eid?warningsCache.find(x=>x.id===eid):null;
+  openModal(w?'Edit Warning':'Issue Warning',`
+    <div class="form-grid"><div class="form-group"><label>Student *</label><select id="w_student">${studentsCache.map(s=>`<option value="${s.id}" ${w&&w.studentId===s.id?'selected':''}>${s.firstName} ${s.lastName} (${s.class})</option>`).join('')}</select></div>
+    <div class="form-group"><label>Date *</label><input type="date" id="w_date" value="${w?w.date:new Date().toISOString().split('T')[0]}"></div></div>
+    <div class="form-group"><label>Reason *</label><textarea id="w_reason" rows="3">${w?w.reason:''}</textarea></div>
+    <button class="btn btn-success" onclick="saveWarning('${eid||''}')" style="width:100%;margin-top:10px">Save</button>`);
+};
+window.saveWarning=async function(eid){
+  const d={studentId:document.getElementById('w_student').value,date:document.getElementById('w_date').value,reason:document.getElementById('w_reason').value};
+  try{
+    if(eid)await updateDoc(doc(db,'warnings',eid),d);
+    else{d.issuedBy=currentUser.fullName;d.createdAt=serverTimestamp();await addDoc(collection(db,'warnings'),d)}
+    await addAuditLog(eid?'EDIT_WARNING':'ADD_WARNING','Warning saved');closeModal();notify('Saved');
+  }catch(e){notify('Error: '+e.message,'error')}
+};
+window.renderWarningsTable=function(){
+  document.getElementById('warningsTableBody').innerHTML=warningsCache.map(x=>{const s=studentsCache.find(stu=>stu.id===x.studentId);
+    return`<tr><td>${formatDate(x.date)}</td><td>${s?s.firstName+' '+s.lastName:'?'}</td><td>${s?s.class:'-'}</td><td>${x.reason}</td><td>${x.issuedBy||'-'}</td><td>${canEdit('warnings')?`<button class="btn btn-sm btn-primary" onclick="showAddWarningModal('${x.id}')">Edit</button>`:''}${canDelete()?` <button class="btn btn-sm btn-danger" onclick="deleteRecord('warnings','${x.id}')">Del</button>`:''}</td></tr>`;
+  }).join('');
+};
+
+window.showAddSuspensionModal=function(eid){
+  const x=eid?suspensionsCache.find(r=>r.id===eid):null;
+  openModal(x?'Edit Suspension':'Add Suspension',`
+    <div class="form-grid"><div class="form-group"><label>Student *</label><select id="su_student">${studentsCache.map(s=>`<option value="${s.id}" ${x&&x.studentId===s.id?'selected':''}>${s.firstName} ${s.lastName} (${s.class})</option>`).join('')}</select></div>
+    <div class="form-group"><label>Date *</label><input type="date" id="su_date" value="${x?x.date:new Date().toISOString().split('T')[0]}"></div>
+    <div class="form-group"><label>Duration *</label><input type="text" id="su_duration" value="${x?x.duration:''}"></div>
+    <div class="form-group"><label>Status</label><select id="su_status"><option ${x&&x.status==='Active'?'selected':''}>Active</option><option ${x&&x.status==='Completed'?'selected':''}>Completed</option><option ${x&&x.status==='Appealed'?'selected':''}>Appealed</option></select></div></div>
+    <div class="form-group"><label>Reason *</label><textarea id="su_reason" rows="3">${x?x.reason:''}</textarea></div>
+    <button class="btn btn-success" onclick="saveSuspension('${eid||''}')" style="width:100%;margin-top:10px">Save</button>`);
+};
+window.saveSuspension=async function(eid){
+  const d={studentId:document.getElementById('su_student').value,date:document.getElementById('su_date').value,duration:document.getElementById('su_duration').value,status:document.getElementById('su_status').value,reason:document.getElementById('su_reason').value};
+  try{
+    if(eid)await updateDoc(doc(db,'suspensions',eid),d);
+    else{d.recordedBy=currentUser.fullName;d.createdAt=serverTimestamp();await addDoc(collection(db,'suspensions'),d)}
+    await addAuditLog(eid?'EDIT_SUSP':'ADD_SUSP','Suspension saved');closeModal();notify('Saved');
+  }catch(e){notify('Error: '+e.message,'error')}
+};
+window.renderSuspensionsTable=function(){
+  document.getElementById('suspensionsTableBody').innerHTML=suspensionsCache.map(x=>{const s=studentsCache.find(stu=>stu.id===x.studentId);
+    return`<tr><td>${formatDate(x.date)}</td><td>${s?s.firstName+' '+s.lastName:'?'}</td><td>${s?s.class:'-'}</td><td>${x.reason}</td><td>${x.duration}</td><td><span class="badge ${x.status==='Active'?'badge-danger':'badge-success'}">${x.status}</span></td><td>${canEdit('suspensions')?`<button class="btn btn-sm btn-primary" onclick="showAddSuspensionModal('${x.id}')">Edit</button>`:''}${canDelete()?` <button class="btn btn-sm btn-danger" onclick="deleteRecord('suspensions','${x.id}')">Del</button>`:''}</td></tr>`;
+  }).join('');
+};
+
+window.showAddExpulsionModal=function(eid){
+  const x=eid?expulsionsCache.find(r=>r.id===eid):null;
+  openModal(x?'Edit Expulsion':'Record Expulsion',`
+    <div class="form-grid"><div class="form-group"><label>Student *</label><select id="e_student">${studentsCache.map(s=>`<option value="${s.id}" ${x&&x.studentId===s.id?'selected':''}>${s.firstName} ${s.lastName} (${s.class})</option>`).join('')}</select></div>
+    <div class="form-group"><label>Date *</label><input type="date" id="e_date" value="${x?x.date:new Date().toISOString().split('T')[0]}"></div>
+    <div class="form-group"><label>Approved By</label><input type="text" id="e_approvedBy" value="${x?x.approvedBy:''}"></div></div>
+    <div class="form-group"><label>Reason *</label><textarea id="e_reason" rows="3">${x?x.reason:''}</textarea></div>
+    <button class="btn btn-success" onclick="saveExpulsion('${eid||''}')" style="width:100%;margin-top:10px">Save</button>`);
+};
+window.saveExpulsion=async function(eid){
+  const d={studentId:document.getElementById('e_student').value,date:document.getElementById('e_date').value,approvedBy:document.getElementById('e_approvedBy').value,reason:document.getElementById('e_reason').value};
+  try{
+    if(eid)await updateDoc(doc(db,'expulsions',eid),d);
+    else{d.recordedBy=currentUser.fullName;d.createdAt=serverTimestamp();await addDoc(collection(db,'expulsions'),d)}
+    await addAuditLog(eid?'EDIT_EXP':'ADD_EXP','Expulsion saved');closeModal();notify('Saved');
+  }catch(e){notify('Error: '+e.message,'error')}
+};
+window.renderExpulsionsTable=function(){
+  document.getElementById('expulsionsTableBody').innerHTML=expulsionsCache.map(x=>{const s=studentsCache.find(stu=>stu.id===x.studentId);
+    return`<tr><td>${formatDate(x.date)}</td><td>${s?s.firstName+' '+s.lastName:'?'}</td><td>${s?s.class:'-'}</td><td>${x.reason}</td><td>${x.approvedBy||'-'}</td><td>${canEdit('expulsions')?`<button class="btn btn-sm btn-primary" onclick="showAddExpulsionModal('${x.id}')">Edit</button>`:''}${canDelete()?` <button class="btn btn-sm btn-danger" onclick="deleteRecord('expulsions','${x.id}')">Del</button>`:''}</td></tr>`;
+  }).join('');
+};
+
+// ============================================================
+// CLINIC
+// ============================================================
+window.showAddClinicModal=function(eid){
+  const c=eid?clinicCache.find(r=>r.id===eid):null;
+  openModal(c?'Edit Visit':'Record Clinic Visit',`
+    <div class="form-grid">
+      <div class="form-group"><label>Student *</label><select id="c_student">${studentsCache.map(s=>`<option value="${s.id}" ${c&&c.studentId===s.id?'selected':''}>${s.firstName} ${s.lastName} (${s.class})</option>`).join('')}</select></div>
+      <div class="form-group"><label>Date *</label><input type="date" id="c_date" value="${c?c.date:new Date().toISOString().split('T')[0]}"></div>
+      <div class="form-group"><label>Arrival Time *</label><input type="time" id="c_arrivalTime" value="${c?c.arrivalTime:''}"></div>
+      <div class="form-group"><label>Doctor/Nurse Name *</label><input type="text" id="c_doctor" value="${c?c.doctor:''}"></div>
+      <div class="form-group"><label>Complaint *</label><textarea id="c_complaint" rows="2">${c?c.complaint:''}</textarea></div>
+      <div class="form-group"><label>Condition Type *</label><select id="c_conditionType"><option value="">-- Select --</option><option value="Pre-existing" ${c&&c.conditionType==='Pre-existing'?'selected':''}>Pre-existing Condition</option><option value="New" ${c&&c.conditionType==='New'?'selected':''}>New Illness</option></select></div>
+      <div class="form-group"><label>Under Medication? *</label><select id="c_onMedication" onchange="document.getElementById('medDetailsGroup').style.display=this.value==='Yes'?'block':'none'"><option value="">-- Select --</option><option value="Yes" ${c&&c.onMedication==='Yes'?'selected':''}>Yes</option><option value="No" ${c&&c.onMedication==='No'?'selected':''}>No</option></select></div>
+      <div class="form-group" id="medDetailsGroup" style="display:${c&&c.onMedication==='Yes'?'block':'none'}"><label>Medication Details</label><input type="text" id="c_medDetails" value="${c?c.medDetails||'':''}" placeholder="e.g. Amoxicillin 250mg"></div>
+      <div class="form-group"><label>Diagnosis</label><textarea id="c_diagnosis" rows="2">${c?c.diagnosis:''}</textarea></div>
+      <div class="form-group"><label>Sent Back to Class?</label><select id="c_sentBack"><option value="">--</option><option ${c&&c.sentBack==='Yes'?'selected':''}>Yes</option><option ${c&&c.sentBack==='No'?'selected':''}>No</option></select></div>
+      <div class="form-group"><label>Time Sent Back</label><input type="time" id="c_sentBackTime" value="${c?c.sentBackTime:''}"></div>
+      <div class="form-group"><label>Parent Contacted?</label><select id="c_parentContacted"><option value="">--</option><option ${c&&c.parentContacted==='Yes'?'selected':''}>Yes</option><option ${c&&c.parentContacted==='No'?'selected':''}>No</option></select></div>
+    </div>
+    <button class="btn btn-success" onclick="saveClinic('${eid||''}')" style="width:100%;margin-top:10px">Save</button>`);
+};
+window.saveClinic=async function(eid){
+  const conditionType=document.getElementById('c_conditionType').value,onMedication=document.getElementById('c_onMedication').value;
+  if(!conditionType){notify('Specify Pre-existing or New illness','error');return}
+  if(!onMedication){notify('Specify medication status','error');return}
+  const d={studentId:document.getElementById('c_student').value,date:document.getElementById('c_date').value,arrivalTime:document.getElementById('c_arrivalTime').value,doctor:document.getElementById('c_doctor').value,complaint:document.getElementById('c_complaint').value,conditionType,onMedication,medDetails:onMedication==='Yes'?document.getElementById('c_medDetails').value:'',diagnosis:document.getElementById('c_diagnosis').value,sentBack:document.getElementById('c_sentBack').value,sentBackTime:document.getElementById('c_sentBackTime').value,parentContacted:document.getElementById('c_parentContacted').value};
+  try{
+    if(eid)await updateDoc(doc(db,'clinic',eid),d);
+    else{d.recordedBy=currentUser.fullName;d.createdAt=serverTimestamp();await addDoc(collection(db,'clinic'),d)}
+    await addAuditLog(eid?'EDIT_CLINIC':'ADD_CLINIC','Clinic visit saved');closeModal();notify('Saved');
+  }catch(e){notify('Error: '+e.message,'error')}
+};
+window.renderClinicTable=function(){
+  document.getElementById('clinicTableBody').innerHTML=clinicCache.map(c=>{const s=studentsCache.find(x=>x.id===c.studentId);
+    const condBadge=c.conditionType==='Pre-existing'?`<span class="badge badge-preexisting">Pre-existing</span>`:c.conditionType==='New'?`<span class="badge badge-newillness">New</span>`:'-';
+    const medBadge=c.onMedication==='Yes'?`<span class="badge badge-med">💊 Yes${c.medDetails?': '+c.medDetails:''}</span>`:c.onMedication==='No'?'No':'-';
+    return`<tr><td>${formatDate(c.date)}</td><td>${s?s.firstName+' '+s.lastName:'?'}</td><td>${c.arrivalTime||'-'}</td><td>${c.doctor||'-'}</td><td>${c.complaint||'-'}</td><td>${condBadge}</td><td>${medBadge}</td><td>${c.diagnosis||'-'}</td><td>${c.sentBack==='Yes'?`Yes (${c.sentBackTime||'-'})`:c.sentBack||'-'}</td><td><span class="badge ${c.parentContacted==='Yes'?'badge-warning':'badge-info'}">${c.parentContacted||'-'}</span></td><td>${canEdit('clinic')?`<button class="btn btn-sm btn-primary" onclick="showAddClinicModal('${c.id}')">Edit</button>`:''}${canDelete()?` <button class="btn btn-sm btn-danger" onclick="deleteRecord('clinic','${c.id}')">Del</button>`:''}</td></tr>`;
+  }).join('');
+};
+
+// ============================================================
+// TEACHERS
+// ============================================================
+window.showAddTeacherModal=function(eid){
+  const t=eid?teachersCache.find(r=>r.id===eid):null;
+  openModal(t?'Edit Teacher':'Add Teacher',`
+    <div class="form-grid">
+      <div class="form-group"><label>Full Name *</label><input type="text" id="t_name" value="${t?t.name:''}"></div>
+      <div class="form-group"><label>Employee ID *</label><input type="text" id="t_empId" value="${t?t.empId:''}"></div>
+      <div class="form-group"><label>TSC Number *</label><input type="text" id="t_tscNo" value="${t?t.tscNo||'':''}"></div>
+      <div class="form-group"><label>Phone</label><input type="text" id="t_phone" value="${t?t.phone:''}"></div>
+      <div class="form-group"><label>Subjects</label><select id="t_subjects" multiple>${SUBJECTS.map(s=>`<option ${t&&t.subjects&&t.subjects.includes(s)?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Classes</label><select id="t_classes" multiple>${CLASSES.map(c=>`<option ${t&&t.classes&&t.classes.includes(c)?'selected':''}>${c}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Status</label><select id="t_status"><option ${t&&t.status==='Active'?'selected':''}>Active</option><option ${t&&t.status==='Inactive'?'selected':''}>Inactive</option></select></div>
+    </div>
+    <button class="btn btn-success" onclick="saveTeacher('${eid||''}')" style="width:100%;margin-top:10px">Save</button>`);
+};
+window.saveTeacher=async function(eid){
+  const subj=Array.from(document.getElementById('t_subjects').selectedOptions).map(o=>o.value);
+  const cls=Array.from(document.getElementById('t_classes').selectedOptions).map(o=>o.value);
+  const d={name:document.getElementById('t_name').value,empId:document.getElementById('t_empId').value,tscNo:document.getElementById('t_tscNo').value,phone:document.getElementById('t_phone').value,subjects:subj,classes:cls,status:document.getElementById('t_status').value};
+  if(!d.name||!d.empId){notify('Name and ID required','error');return}
+  try{
+    if(eid)await updateDoc(doc(db,'teachers',eid),d);
+    else await addDoc(collection(db,'teachers'),d);
+    await addAuditLog(eid?'EDIT_TEACHER':'ADD_TEACHER','Teacher: '+d.name);closeModal();notify('Saved');
+  }catch(e){notify('Error: '+e.message,'error')}
+};
+window.renderTeachersTable=function(){
+  document.getElementById('teachersTableBody').innerHTML=teachersCache.map(x=>`<tr><td>${x.name}</td><td>${x.empId}</td><td>${x.tscNo||'-'}</td><td>${(x.subjects||[]).map(s=>`<span class="badge badge-info">${s}</span> `).join('')}</td><td>${(x.classes||[]).join(', ')||'-'}</td><td>${x.phone||'-'}</td><td><span class="badge ${x.status==='Active'?'badge-success':'badge-danger'}">${x.status}</span></td><td>${currentUser.role==='admin'?`<button class="btn btn-sm btn-primary" onclick="showAddTeacherModal('${x.id}')">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteRecord('teachers','${x.id}')">Del</button>`:''}</td></tr>`).join('');
+};
+window.renderTeacherPerfChart=function(){
+  const labels=teachersCache.map(x=>x.name),avgs=teachersCache.map(x=>{const tg=gradesCache.filter(g=>(x.subjects||[]).includes(g.subject));return tg.length?Math.round(tg.reduce((s,g)=>s+(g.test1||0)+(g.test2||0)+(g.exam||0),0)/tg.length):0});
+  destroyChart('teacherPerfChart');
+  chartInstances['teacherPerfChart']=new Chart(document.getElementById('teacherPerfChart'),{type:'bar',data:{labels,datasets:[{data:avgs,backgroundColor:avgs.map(getGradeColor)}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100}}}});
+};
+
+// ============================================================
+// TEACHER ATTENDANCE (deterministic ID: teacherId_date)
+// ============================================================
+window.showTeacherAttendanceModal=function(){
+  const active=teachersCache.filter(x=>x.status==='Active');
+  const today=new Date().toISOString().split('T')[0],now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+  openModal('Teacher Attendance',`<div class="form-group"><label>Date</label><input type="date" id="ta_date" value="${today}"></div>
+    ${active.map(x=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #eee;flex-wrap:wrap">
+      <span style="flex:1;min-width:120px;font-size:0.85em">${x.name}</span>
+      <input type="time" id="tat_${x.id}" value="${now}" style="width:100px;padding:4px">
+      <select id="tas_${x.id}" style="width:100px;padding:4px" onchange="document.getElementById('tar_${x.id}').style.display=this.value==='Absent'?'inline-block':'none'"><option>Present</option><option>Absent</option><option>Late</option></select>
+      <input type="text" id="tar_${x.id}" placeholder="Reason" style="width:160px;padding:4px;font-size:0.8em;display:none">
+    </div>`).join('')}
+    <button class="btn btn-success" onclick="saveTeacherAtt()" style="width:100%;margin-top:15px">Save</button>`);
+};
+window.saveTeacherAtt=async function(){
+  const date=document.getElementById('ta_date').value,active=teachersCache.filter(x=>x.status==='Active');
+  const promises=active.map(x=>{
+    const se=document.getElementById('tas_'+x.id);if(!se)return Promise.resolve();
+    const reasonEl=document.getElementById('tar_'+x.id);
+    const reason=se.value==='Absent'?(reasonEl?reasonEl.value:''):'';
+    const id=x.id+'_'+date;
+    return setDoc(doc(db,'teacherAttendance',id),{teacherId:x.id,date,time:document.getElementById('tat_'+x.id)?.value||'',status:se.value,reason,markedBy:currentUser.fullName});
+  });
+  try{await Promise.all(promises);await addAuditLog('TEACHER_ATT',date);closeModal();notify('Saved')}
+  catch(e){notify('Error: '+e.message,'error')}
+};
+window.renderTeacherAttendance=function(){
+  const df=document.getElementById('teacherAttDate').value;
+  const f=df?teacherAttCache.filter(x=>x.date===df):teacherAttCache;
+  const sorted=[...f].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  document.getElementById('teacherAttendanceBody').innerHTML=sorted.map(x=>{const te=teachersCache.find(te=>te.id===x.teacherId);
+    return`<tr><td>${formatDate(x.date)}</td><td>${te?te.name:'?'}</td><td>${x.time||'-'}</td><td><span class="badge ${x.status==='Present'?'badge-success':x.status==='Absent'?'badge-danger':'badge-warning'}">${x.status}</span></td><td>${x.reason||'-'}</td><td>${x.markedBy||'-'}</td><td>${canDelete()?`<button class="btn btn-sm btn-danger" onclick="deleteRecord('teacherAttendance','${x.id}')">Del</button>`:''}</td></tr>`;
+  }).join('');
+};
+
+// ============================================================
+// CLASSROOM
+// ============================================================
+window.showClassroomModal=function(eid){
+  const c=eid?classroomCache.find(r=>r.id===eid):null;
+  openModal(c?'Edit Issue':'Report Classroom Issue',`
+    <div class="form-grid">
+      <div class="form-group"><label>Date</label><input type="date" id="cr_date" value="${c?c.date:new Date().toISOString().split('T')[0]}"></div>
+      <div class="form-group"><label>Classroom/Facility *</label><select id="cr_classroom">${ROOMS.map(cl=>`<option ${c&&c.classroom===cl?'selected':''}>${cl}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Item/Issue *</label><input type="text" id="cr_item" value="${c?c.item:''}"></div>
+      <div class="form-group"><label>Status</label><select id="cr_status"><option ${c&&c.status==='Working'?'selected':''}>Working</option><option ${c&&c.status==='Needs Fix'?'selected':''}>Needs Fix</option><option ${c&&c.status==='Broken'?'selected':''}>Broken</option><option ${c&&c.status==='Fixed'?'selected':''}>Fixed</option></select></div>
+      <div class="form-group"><label>Date it Broke</label><input type="date" id="cr_brokeDate" value="${c?c.brokeDate:''}"></div>
+      <div class="form-group"><label>Who Broke It</label><input type="text" id="cr_brokeBy" value="${c?c.brokeBy:''}"></div>
+    </div>
+    <div class="form-group"><label>Notes</label><textarea id="cr_notes" rows="3">${c?c.notes:''}</textarea></div>
+    <button class="btn btn-success" onclick="saveClassroom('${eid||''}')" style="width:100%;margin-top:10px">Save</button>`);
+};
+window.saveClassroom=async function(eid){
+  const d={date:document.getElementById('cr_date').value,classroom:document.getElementById('cr_classroom').value,item:document.getElementById('cr_item').value,status:document.getElementById('cr_status').value,brokeDate:document.getElementById('cr_brokeDate').value,brokeBy:document.getElementById('cr_brokeBy').value,notes:document.getElementById('cr_notes').value};
+  if(!d.item){notify('Item required','error');return}
+  try{
+    if(eid)await updateDoc(doc(db,'classroom',eid),d);
+    else{d.reportedBy=currentUser.fullName;await addDoc(collection(db,'classroom'),d)}
+    await addAuditLog(eid?'EDIT_ROOM':'ADD_ROOM',d.item);closeModal();notify('Saved');
+  }catch(e){notify('Error: '+e.message,'error')}
+};
+window.renderClassroomTable=function(){
+  document.getElementById('classroomTableBody').innerHTML=classroomCache.map(c=>`<tr><td>${formatDate(c.date)}</td><td>${c.classroom}</td><td>${c.item}</td><td><span class="badge ${c.status==='Working'||c.status==='Fixed'?'badge-success':c.status==='Needs Fix'?'badge-warning':'badge-danger'}">${c.status}</span></td><td>${formatDate(c.brokeDate)}</td><td>${c.reportedBy||'-'}</td><td>${c.brokeBy||'-'}</td><td>${c.notes||'-'}</td><td>${canEdit('classroom')?`<button class="btn btn-sm btn-primary" onclick="showClassroomModal('${c.id}')">Edit</button>`:''}${canDelete()?` <button class="btn btn-sm btn-danger" onclick="deleteRecord('classroom','${c.id}')">Del</button>`:''}</td></tr>`).join('');
+};
+
+// ============================================================
+// ANALYTICS
+// ============================================================
+function populateAnalyticsSelects(){
+  const sSel=document.getElementById('analyticsStudentSelect'),cSel=document.getElementById('analyticsClassSelect');
+  if(!sSel||!cSel)return;
+  const curS=sSel.value,curC=cSel.value;
+  sSel.innerHTML='<option value="">Select student</option>'+studentsCache.map(s=>`<option value="${s.id}">${s.firstName} ${s.lastName} (${s.class})</option>`).join('');
+  cSel.innerHTML='<option value="">Select class</option>'+CLASSES.map(c=>`<option>${c}</option>`).join('');
+  if([...sSel.options].some(o=>o.value===curS))sSel.value=curS;
+  if([...cSel.options].some(o=>o.value===curC))cSel.value=curC;
+}
+window.renderStudentCharts=function(){
+  const sid=document.getElementById('analyticsStudentSelect').value;if(!sid)return;
+  const grades=gradesCache.filter(g=>g.studentId===sid);
+  const sg={};grades.forEach(g=>{if(!sg[g.subject])sg[g.subject]=[];sg[g.subject].push((g.test1||0)+(g.test2||0)+(g.exam||0))});
+  const sl=Object.keys(sg),sa=sl.map(s=>Math.round(sg[s].reduce((a,b)=>a+b,0)/sg[s].length));
+  let a1={};if(sa.length){const mx=Math.max(...sa),mi=sa.indexOf(mx);a1={insight:{type:'label',xValue:sl[mi],yValue:mx+5,text:'Highest: '+mx+'%',font:{size:11,weight:'bold'},color:'#27ae60'}}}
+  destroyChart('studentSubjectChart');
+  chartInstances['studentSubjectChart']=new Chart(document.getElementById('studentSubjectChart'),{type:'bar',data:{labels:sl,datasets:[{data:sa,backgroundColor:sa.map(getGradeColor)}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100}},plugins:{annotation:{annotations:a1}}}});
+  const terms=['Term 1','Term 2','Term 3'],tvs=terms.map(t=>{const tg=grades.filter(g=>g.term===t);return tg.length?Math.round(tg.reduce((s,g)=>s+(g.test1||0)+(g.test2||0)+(g.exam||0),0)/tg.length):null});
+  const vt=terms.filter((_,i)=>tvs[i]!==null),va=tvs.filter(v=>v!==null);let a2={};
+  if(va.length>=2){const df=va[va.length-1]-va[0],tx=df>0?`↑ +${df} pts`:df<0?`↓ -${Math.abs(df)} pts`:'No change';a2={trend:{type:'label',xValue:vt[vt.length-1],yValue:Math.max(...va)+5,text:tx,font:{size:11,weight:'bold'},color:df>=0?'#27ae60':'#e74c3c'}}}
+  destroyChart('studentTrendChart');
+  chartInstances['studentTrendChart']=new Chart(document.getElementById('studentTrendChart'),{type:'line',data:{labels:vt,datasets:[{data:va,borderColor:'#2e86c1',fill:true,tension:0.3,pointRadius:6,pointBackgroundColor:va.map(getGradeColor)}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100}},plugins:{annotation:{annotations:a2}}}});
+};
+window.renderClassCharts=function(){
+  const cls=document.getElementById('analyticsClassSelect').value;if(!cls)return;
+  const students=studentsCache.filter(s=>s.class===cls),sids=students.map(s=>s.id),cg=gradesCache.filter(g=>sids.includes(g.studentId));
+  const sg={};cg.forEach(g=>{if(!sg[g.subject])sg[g.subject]=[];sg[g.subject].push((g.test1||0)+(g.test2||0)+(g.exam||0))});
+  const sl=Object.keys(sg),sa=sl.map(s=>Math.round(sg[s].reduce((a,b)=>a+b,0)/sg[s].length));
+  let imp=0;students.forEach(s=>{const sg2=cg.filter(g=>g.studentId===s.id);const t1=sg2.filter(g=>g.term==='Term 1').reduce((s,g)=>s+(g.test1||0)+(g.test2||0)+(g.exam||0),0),t2=sg2.filter(g=>g.term==='Term 2').reduce((s,g)=>s+(g.test1||0)+(g.test2||0)+(g.exam||0),0);if(t2-t1>=10)imp++});
+  let a={};if(imp>0)a={improve:{type:'label',position:'start',content:`${imp} student(s) improved 10+ pts`,font:{size:11,weight:'bold'},color:'#27ae60',yAdjust:-10}};
+  destroyChart('classSubjectChart');
+  chartInstances['classSubjectChart']=new Chart(document.getElementById('classSubjectChart'),{type:'bar',data:{labels:sl,datasets:[{data:sa,backgroundColor:sa.map(getGradeColor)}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100}},plugins:{annotation:{annotations:a}}}});
+  const stuAvg=students.map(s=>{const sg2=cg.filter(g=>g.studentId===s.id);return sg2.length?Math.round(sg2.reduce((su,g)=>su+(g.test1||0)+(g.test2||0)+(g.exam||0),0)/sg2.length):0});
+  destroyChart('classComparisonChart');
+  chartInstances['classComparisonChart']=new Chart(document.getElementById('classComparisonChart'),{type:'bar',data:{labels:students.map(s=>s.firstName),datasets:[{data:stuAvg,backgroundColor:stuAvg.map(getGradeColor)}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100}},plugins:{legend:{display:false}}}});
+};
+
+// ============================================================
+// USERS (Admin creates via secondary Firebase app instance)
+// ============================================================
+window.showAddUserModal=function(eid){
+  const u=eid?usersCache.find(x=>x.id===eid):null;
+  openModal(u?'Edit User':'Add User',`
+    <div class="form-grid">
+      <div class="form-group"><label>Email *</label><input type="email" id="u_email" value="${u?u.email||u.id:''}" ${u?'readonly':''}></div>
+      <div class="form-group"><label>Full Name *</label><input type="text" id="u_fullName" value="${u?u.fullName:''}"></div>
+      ${!u?'<div class="form-group"><label>Password * (min 6 chars)</label><input type="text" id="u_password" value=""></div>':''}
+      <div class="form-group"><label>Role *</label><select id="u_role">
+        <option value="admin" ${u&&u.role==='admin'?'selected':''}>Admin</option>
+        <option value="principal" ${u&&u.role==='principal'?'selected':''}>Principal</option>
+        <option value="teacher" ${u&&u.role==='teacher'?'selected':''}>Teacher</option>
+        <option value="nurse" ${u&&u.role==='nurse'?'selected':''}>Nurse</option>
+        <option value="secretary" ${u&&u.role==='secretary'?'selected':''}>Secretary</option>
+        <option value="director" ${u&&u.role==='director'?'selected':''}>Director (View Only)</option>
+      </select></div>
+      <div class="form-group"><label>Class (teachers)</label><select id="u_class"><option value="">None</option>${CLASSES.map(c=>`<option ${u&&u.class===c?'selected':''}>${c}</option>`).join('')}</select></div>
+    </div>
+    <button class="btn btn-success" onclick="saveUser('${eid||''}')" style="width:100%;margin-top:10px">Save</button>`);
+};
+window.saveUser=async function(eid){
+  const fn=document.getElementById('u_fullName').value.trim(),rl=document.getElementById('u_role').value,cl=document.getElementById('u_class').value;
+  if(!fn){notify('Full name required','error');return}
+  try{
+    if(!eid){
+      const email=document.getElementById('u_email').value.trim(),pw=document.getElementById('u_password').value;
+      if(!email||!pw){notify('Email and password required','error');return}
+      const cred=await createUserWithEmailAndPassword(secondaryAuth,email,pw);
+      await setDoc(doc(db,'users',cred.user.uid),{email,fullName:fn,role:rl,class:cl,createdAt:serverTimestamp(),loginCount:0});
+      await signOut(secondaryAuth);
+      await addAuditLog('ADD_USER',fn+' ('+rl+')');
+      notify('User created');
+    }else{
+      await updateDoc(doc(db,'users',eid),{fullName:fn,role:rl,class:cl});
+      await addAuditLog('EDIT_USER',fn+' ('+rl+')');
+      notify('User updated');
+    }
+    closeModal();
+  }catch(err){notify(friendlyAuthError(err.code)||err.message,'error')}
+};
+window.renderUsersTable=function(){
+  document.getElementById('usersTableBody').innerHTML=usersCache.map(u=>`<tr><td>${u.email||u.id}</td><td>${u.fullName}</td><td><span class="badge badge-info">${u.role}</span></td><td>${u.class||'-'}</td><td>${formatTS(u.lastLogin)}</td><td>${u.loginCount||0}</td><td>
+    <button class="btn btn-sm btn-primary" onclick="showAddUserModal('${u.id}')">Edit</button>
+    <button class="btn btn-sm btn-warning" onclick="resetUserPassword('${u.id}')">📧 Reset Pwd</button>
+    ${u.id!==currentUser.uid?`<button class="btn btn-sm btn-danger" onclick="removeUser('${u.id}')">Remove</button>`:''}
+  </td></tr>`).join('');
+};
+window.resetUserPassword=async function(userId){
+  const u=usersCache.find(x=>x.id===userId);
+  if(!u||!u.email){notify('No email on file for this user','error');return}
+  try{
+    await sendPasswordResetEmail(auth,u.email);
+    notify('Reset email sent to '+u.email);
+  }catch(err){notify(friendlyAuthError(err.code),'error')}
+};
+window.removeUser=async function(id){
+  if(!confirm('Remove this user? They will immediately lose access.'))return;
+  await deleteDoc(doc(db,'users',id));
+  await addAuditLog('DELETE_USER',id);
+  notify('User access revoked');
+};
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+function populateAuditFilter(){
+  const sel=document.getElementById('auditUserFilter');if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">All</option>'+[...new Set(auditCache.map(l=>l.user))].map(u=>`<option value="${u}">${u}</option>`).join('');
+  if([...sel.options].some(o=>o.value===cur))sel.value=cur;
+}
+window.renderAuditLog=function(){
+  let logs=[...auditCache];
+  const uf=document.getElementById('auditUserFilter').value;
+  if(uf)logs=logs.filter(l=>l.user===uf);
+  logs.sort((a,b)=>{const at=a.time?.toMillis?a.time.toMillis():0,bt=b.time?.toMillis?b.time.toMillis():0;return bt-at});
+  document.getElementById('auditLogContent').innerHTML=logs.length?logs.slice(0,200).map(l=>`<div class="log-entry"><strong>${l.user}</strong> <span class="badge badge-info">${l.role}</span> — <strong>${l.action}</strong>: ${l.details}<div class="log-time">${formatTS(l.time)}</div></div>`).join(''):'<p style="text-align:center;color:#999;padding:20px">No logs</p>';
+};
+
+// ============================================================
+// GENERIC DELETE
+// ============================================================
+window.deleteRecord=async function(collectionName,id){
+  if(!confirm('Delete this record?'))return;
+  try{
+    await deleteDoc(doc(db,collectionName,id));
+    await addAuditLog('DELETE','Record deleted from '+collectionName);
+    notify('Deleted');
+  }catch(e){notify('Error: '+e.message,'error')}
+};
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  const t=new Date().toISOString().split('T')[0];
+  const af=document.getElementById('attendanceDateFilter');if(af)af.value=t;
+  const rf=document.getElementById('registerDateFilter');if(rf)rf.value=t;
+  document.getElementById('loginPassword').addEventListener('keypress',e=>{if(e.key==='Enter')handleLogin()});
+  document.getElementById('loginEmail').addEventListener('keypress',e=>{if(e.key==='Enter')document.getElementById('loginPassword').focus()});
+});
+</script>
+</body>
+</html>
